@@ -2,50 +2,47 @@ apiVersion: aws.hops.ops.com.ai/v1alpha1
 kind: IdentityCenter
 metadata:
   name: workloads-sso
-  namespace: example-env
+  namespace: default
 spec:
   organizationName: workloads
   managementMode: self
-  forProvider:
-    rootAccountRef:
-      name: hops-root
-    identityCenter:
-      providerConfig: identity-center
-      instanceArn: arn:aws:sso:::instance/ssoins-abcdef0123456789
-      relayState: https://console.aws.amazon.com/
-    identityStore:
-      providerConfig: identity-center
-      identityStoreId: d-0987654321
-    groups:
-      - name: WorkloadsEngineering
-        displayName: Workloads Engineering
-    localUsers:
-      - username: workloads-reader
-        email: reader@example.com
-        displayName: Workloads Reader
-        groups: [WorkloadsEngineering]
-    permissionSets:
-      - name: workloads-readonly
-        assignToGroups: [WorkloadsEngineering]
-        assignToAccounts: ["210987654321"]
-        inlinePolicy: |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {
-                "Effect": "Allow",
-                "Action": [
-                  "ec2:Describe*"
-                ],
-                "Resource": "*"
-              }
-            ]
-          }
-        customerManagedPolicies:
-          - name: CustomAudit
-            path: /auditors/
-        assignments:
-          - accountId: "999999999999"
-            principal:
-              type: USER
-              name: workloads-reader
+  managementPolicies: ["*"]
+  providerConfigName: aws-provider
+  identityCenter:
+    instanceArn: arn:aws:sso:::instance/ssoins-abcdef0123456789
+    relayState: https://console.aws.amazon.com/
+  identityStore:
+    id: d-0987654321
+  groups:
+    - name: WorkloadsEngineering
+      displayName: Workloads Engineering
+  users:
+    - username: workloads-reader
+      email: reader@example.com
+      displayName: Workloads Reader
+      groups: [WorkloadsEngineering]
+  permissionSets:
+    - name: workloads-readonly
+      assignToGroups: [WorkloadsEngineering]
+      assignToAccounts: ["210987654321"]
+      inlinePolicy: |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ec2:Describe*"
+              ],
+              "Resource": "*"
+            }
+          ]
+        }
+      customerManagedPolicies:
+        - name: CustomAudit
+          path: /auditors/
+      assignments:
+        - accountId: "999999999999"
+          principal:
+            type: USER
+            name: workloads-reader

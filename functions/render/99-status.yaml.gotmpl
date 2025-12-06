@@ -9,9 +9,9 @@ status:
     instanceArn: {{ $identityCenterInstanceArn }}
     ready: {{ if $identityCenterInstanceArn }}true{{ else }}false{{ end }}
   identityStore:
-    identityStoreId: {{ $identityStoreId }}
+    id: {{ $identityStoreId }}
     users:
-{{- range $user := $localUsers }}
+{{- range $user := $users }}
       {{- $userName := $user.username }}
       {{- $observedUser := get $observedUsers $userName | default (dict) }}
       {{- $userId := $observedUser.id | default "" }}

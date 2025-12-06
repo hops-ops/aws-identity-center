@@ -1,4 +1,2 @@
-_output
-.venv
+tests/e2etest-identity-center/aws-creds
 .up
-.tmp

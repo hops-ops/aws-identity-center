@@ -21,7 +21,6 @@ metadata:
   labels:
     {{- toYaml $groupLabels | nindent 4 }}
 spec:
-  deletionPolicy: {{ $deletionPolicy }}
   managementPolicies: {{ toYaml $managementPolicies | nindent 4 }}
   forProvider:
     identityStoreId: {{ $identityStoreId }}
@@ -31,7 +30,7 @@ spec:
     {{- end }}
   providerConfigRef:
     kind: ProviderConfig
-    name: {{ $identityStoreProviderConfig }}
+    name: {{ $providerConfigName }}
 
     {{- end }}
   {{- end }}

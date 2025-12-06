@@ -26,7 +26,7 @@ render-all:
 	done
 
 test:
-	up test run tests/*
+	up test run tests/test-*
 
 validate: validate-composition validate-examples
 
@@ -45,3 +45,6 @@ generate-definitions:
 
 generate-function:
 	up function generate --language=go-templating render $(COMPOSITION)
+
+e2e:
+	up test run tests/e2etest* --e2e

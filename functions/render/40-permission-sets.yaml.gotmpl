@@ -42,7 +42,7 @@ spec:
     {{- end }}
   providerConfigRef:
     kind: ProviderConfig
-    name: {{ $identityCenterProviderConfig }}
+    name: {{ $providerConfigName }}
 
     {{- if $inlinePolicy }}
 
@@ -67,7 +67,7 @@ spec:
       name: {{ $permissionSetResourceName }}
   providerConfigRef:
     kind: ProviderConfig
-    name: {{ $identityCenterProviderConfig }}
+    name: {{ $providerConfigName }}
 
     {{- end }}
 
@@ -94,7 +94,7 @@ spec:
       name: {{ $permissionSetResourceName }}
   providerConfigRef:
     kind: ProviderConfig
-    name: {{ $identityCenterProviderConfig }}
+    name: {{ $providerConfigName }}
 
       {{- end }}
     {{- end }}
@@ -126,7 +126,7 @@ spec:
       {{- end }}
   providerConfigRef:
     kind: ProviderConfig
-    name: {{ $identityCenterProviderConfig }}
+    name: {{ $providerConfigName }}
 
       {{- end }}
     {{- end }}

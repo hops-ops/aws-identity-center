@@ -3,7 +3,7 @@
 {{ $observed := $.observed.resources | default (dict) }}
 {{ $observedUsers := dict }}
 {{ $observedGroups := dict }}
-{{ range $user := $localUsers }}
+{{ range $user := $users }}
   {{- $username := $user.username }}
   {{- if $username }}
     {{- $key := printf "identity-center-user-%s" $username }}

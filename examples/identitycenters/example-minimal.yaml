@@ -2,46 +2,28 @@ apiVersion: aws.hops.ops.com.ai/v1alpha1
 kind: IdentityCenter
 metadata:
   name: platform-sso
-  namespace: example-env
+  namespace: default
 spec:
-  organizationName: platform
-  managementMode: self
-  forProvider:
-    rootAccountRef:
-      name: hops-root
-    identityCenter:
-      providerConfig: identity-center
-      instanceArn: arn:aws:sso:::instance/ssoins-1234567890abcdef
-      sessionDuration: PT2H
-    identityStore:
-      providerConfig: identity-center
-      identityStoreId: d-1234567890
-    groups:
-      - name: Admins
-        displayName: Platform Admins
-      - name: Developers
-        displayName: Platform Developers
-        description: Full stack platform builders
-    localUsers:
-      - username: platform-admin
-        email: platform-admin@example.com
-        firstName: Platform
-        lastName: Admin
-        groups: [Admins]
-      - username: platform-dev-1
-        email: dev1@example.com
-        firstName: Dev
-        lastName: One
-        groups: [Developers]
-    permissionSets:
-      - name: HopsAdministratorAccess
-        description: Admin access for platform team
-        managedPolicies:
-          - arn:aws:iam::aws:policy/AdministratorAccess
-        assignToGroups: [Admins]
-        assignToAccounts: ["123456789012"]
-      - name: HopsDeveloperAccess
-        managedPolicies:
-          - arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly
-        assignToGroups: [Developers]
-        assignToAccounts: ["210987654321"]
+  managementPolicies: ["*"]
+  providerConfigName: aws-provider
+  identityCenter:
+    instanceArn: arn:aws:sso:::instance/ssoins-1234567890abcdef
+    sessionDuration: PT2H
+  identityStore:
+    id: d-1234567890
+  groups:
+    - name: Admins
+      displayName: Platform Admins
+  users:
+    - username: platform-admin
+      email: platform-admin@example.com
+      firstName: Platform
+      lastName: Admin
+      groups: [Admins]
+  permissionSets:
+    - name: AdminAccess
+      description: Full admin access
+      managedPolicies:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      assignToGroups: [Admins]
+      assignToAccounts: ["123456789012"]

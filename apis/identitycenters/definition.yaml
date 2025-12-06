@@ -23,7 +23,6 @@ spec:
             type: object
             description: Desired Identity Center configuration.
             required:
-            - forProvider
             - managementPolicies
             properties:
               organizationName:
@@ -56,220 +55,194 @@ spec:
                 - "*"
               providerConfigName:
                 type: string
-                description: ProviderConfig used for Identity Center API calls. Defaults to rootAccountRef.name.
-              forProvider:
+                description: ProviderConfig used for all AWS API calls. Defaults to metadata.name.
+              identityCenter:
                 type: object
-                description: Provider specific Identity Center settings.
-                required:
-                - permissionSets
-                - rootAccountRef
+                description: Optional overrides for the Identity Center instance.
                 properties:
-                  rootAccountRef:
+                  instanceArn:
+                    type: string
+                    description: Identity Center instance ARN (arn:aws:sso:::instance/ssoins-1234567890abcdef). If not provided, the composition will create a new instance.
+                  relayState:
+                    type: string
+                    description: Default relay state for permission sets.
+                  sessionDuration:
+                    type: string
+                    description: Default session duration (ISO8601). Defaults to PT1H.
+                  tags:
                     type: object
-                    description: Reference to the Account composite that represents the AWS Organizations root account.
-                    required:
-                    - name
+                    description: Extra tags merged onto permission sets.
+                    x-kubernetes-preserve-unknown-fields: true
+              identityStore:
+                type: object
+                description: Identity Store configuration when rendering local users and groups.
+                properties:
+                  id:
+                    type: string
+                    description: Identity Store ID (for example, d-1234567890). If not provided, will be derived from the Identity Center instance.
+              groups:
+                type: array
+                description: Optional list of Identity Store groups to create.
+                items:
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+                      description: Logical group name.
+                    displayName:
+                      type: string
+                    description:
+                      type: string
+                    tags:
+                      type: object
+                      description: Extra labels mirrored onto the metadata.labels map.
+                      x-kubernetes-preserve-unknown-fields: true
+              users:
+                type: array
+                description: Optional list of users to create in the Identity Store.
+                items:
+                  type: object
+                  required:
+                  - email
+                  - username
+                  properties:
+                    username:
+                      type: string
+                      description: Identity Store username.
+                    email:
+                      type: string
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    displayName:
+                      type: string
+                    groups:
+                      type: array
+                      description: Group names the user should join.
+                      items:
+                        type: string
+                    tags:
+                      type: object
+                      description: Extra labels mirrored onto the metadata.labels map.
+                      x-kubernetes-preserve-unknown-fields: true
+              permissionSets:
+                type: array
+                description: Optional permission sets plus account assignments.
+                items:
+                  type: object
+                  required:
+                  - name
+                  properties:
+                    name:
+                      type: string
+                      description: Name of the permission set presented in the AWS console.
+                    description:
+                      type: string
+                    relayState:
+                      type: string
+                    sessionDuration:
+                      type: string
+                    inlinePolicy:
+                      type: string
+                      description: Inline JSON policy document attached to the permission set.
+                    managedPolicies:
+                      type: array
+                      description: AWS managed policy ARNs to attach.
+                      items:
+                        type: string
+                    customerManagedPolicies:
+                      type: array
+                      description: Customer managed policy references to attach.
+                      items:
+                        type: object
+                        required:
+                        - name
+                        properties:
+                          name:
+                            type: string
+                            description: Name of the IAM policy.
+                          path:
+                            type: string
+                            description: Path containing the IAM policy. Defaults to /.
+                    tags:
+                      type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    assignToAccounts:
+                      type: array
+                      description: AWS account identifiers that should receive assignments.
+                      items:
+                        type: string
+                    assignToGroups:
+                      type: array
+                      description: Identity Store group names that should receive assignments.
+                      items:
+                        type: string
+                    assignToUsers:
+                      type: array
+                      description: Local user names that should receive assignments.
+                      items:
+                        type: string
+                    assignments:
+                      type: array
+                      description: Advanced account assignments applied to this permission set.
+                      items:
+                        type: object
+                        required:
+                        - accountId
+                        properties:
+                          accountId:
+                            type: string
+                          principal:
+                            type: object
+                            description: Preferred way to reference principals.
+                            properties:
+                              type:
+                                type: string
+                                enum:
+                                - USER
+                                - GROUP
+                              id:
+                                type: string
+                              name:
+                                type: string
+                          principalType:
+                            type: string
+                            description: Deprecated; prefer principal.type.
+                          principalId:
+                            type: string
+                            description: Deprecated; prefer principal.id.
+              externalIdP:
+                type: object
+                description: Optional external identity provider integration.
+                properties:
+                  type:
+                    type: string
+                    enum:
+                    - oidc
+                    - saml
+                  issuerUrl:
+                    type: string
+                  clientIdSecretRef:
+                    type: object
                     properties:
                       name:
                         type: string
-                        description: Name of the Account composite resource.
                       namespace:
                         type: string
-                        description: Namespace of the Account composite if different from this XR.
-                  identityCenter:
+                      key:
+                        type: string
+                  clientSecretSecretRef:
                     type: object
-                    description: Optional overrides for the Identity Center instance.
                     properties:
-                      providerConfig:
+                      name:
                         type: string
-                        description: ProviderConfig for SSO Admin API calls. Defaults to providerConfigName.
-                      instanceArn:
+                      namespace:
                         type: string
-                        description: Identity Center instance ARN (arn:aws:sso:::instance/ssoins-1234567890abcdef).
-                      relayState:
+                      key:
                         type: string
-                        description: Default relay state for permission sets.
-                      sessionDuration:
-                        type: string
-                        description: Default session duration (ISO8601). Defaults to PT1H.
-                      tags:
-                        type: object
-                        description: Extra tags merged onto permission sets.
-                        x-kubernetes-preserve-unknown-fields: true
-                  identityStore:
-                    type: object
-                    description: Identity Store configuration when rendering local users and groups.
-                    properties:
-                      providerConfig:
-                        type: string
-                        description: ProviderConfig for Identity Store API calls. Defaults to identityCenter.providerConfig.
-                      identityStoreId:
-                        type: string
-                        description: Identity Store ID (for example, d-1234567890). Required to render users and groups.
-                  groups:
-                    type: array
-                    description: Optional list of Identity Store groups to create.
-                    items:
-                      type: object
-                      required:
-                      - name
-                      properties:
-                        name:
-                          type: string
-                          description: Logical group name.
-                        displayName:
-                          type: string
-                        description:
-                          type: string
-                        tags:
-                          type: object
-                          description: Extra labels mirrored onto the metadata.labels map.
-                          x-kubernetes-preserve-unknown-fields: true
-                  localUsers:
-                    type: array
-                    description: Optional list of starter local users.
-                    items:
-                      type: object
-                      required:
-                      - email
-                      - username
-                      properties:
-                        username:
-                          type: string
-                          description: Identity Store username.
-                        email:
-                          type: string
-                        firstName:
-                          type: string
-                        lastName:
-                          type: string
-                        displayName:
-                          type: string
-                        groups:
-                          type: array
-                          description: Group names the user should join.
-                          items:
-                            type: string
-                        tags:
-                          type: object
-                          description: Extra labels mirrored onto the metadata.labels map.
-                          x-kubernetes-preserve-unknown-fields: true
-                  permissionSets:
-                    type: array
-                    description: Permission sets plus account assignments.
-                    minItems: 1
-                    items:
-                      type: object
-                      required:
-                      - name
-                      properties:
-                        name:
-                          type: string
-                          description: Name of the permission set presented in the AWS console.
-                        description:
-                          type: string
-                        relayState:
-                          type: string
-                        sessionDuration:
-                          type: string
-                        inlinePolicy:
-                          type: string
-                          description: Inline JSON policy document attached to the permission set.
-                        managedPolicies:
-                          type: array
-                          description: AWS managed policy ARNs to attach.
-                          items:
-                            type: string
-                        customerManagedPolicies:
-                          type: array
-                          description: Customer managed policy references to attach.
-                          items:
-                            type: object
-                            required:
-                            - name
-                            properties:
-                              name:
-                                type: string
-                                description: Name of the IAM policy.
-                              path:
-                                type: string
-                                description: Path containing the IAM policy. Defaults to /.
-                        tags:
-                          type: object
-                          x-kubernetes-preserve-unknown-fields: true
-                        assignToAccounts:
-                          type: array
-                          description: AWS account identifiers that should receive assignments.
-                          items:
-                            type: string
-                        assignToGroups:
-                          type: array
-                          description: Identity Store group names that should receive assignments.
-                          items:
-                            type: string
-                        assignToUsers:
-                          type: array
-                          description: Local user names that should receive assignments.
-                          items:
-                            type: string
-                        assignments:
-                          type: array
-                          description: Advanced account assignments applied to this permission set.
-                          items:
-                            type: object
-                            required:
-                            - accountId
-                            properties:
-                              accountId:
-                                type: string
-                              principal:
-                                type: object
-                                description: Preferred way to reference principals.
-                                properties:
-                                  type:
-                                    type: string
-                                    enum:
-                                    - USER
-                                    - GROUP
-                                  id:
-                                    type: string
-                                  name:
-                                    type: string
-                              principalType:
-                                type: string
-                                description: Deprecated; prefer principal.type.
-                              principalId:
-                                type: string
-                                description: Deprecated; prefer principal.id.
-                  externalIdP:
-                    type: object
-                    description: Optional external identity provider integration.
-                    properties:
-                      type:
-                        type: string
-                        enum:
-                        - oidc
-                        - saml
-                      issuerUrl:
-                        type: string
-                      clientIdSecretRef:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                          namespace:
-                            type: string
-                          key:
-                            type: string
-                      clientSecretSecretRef:
-                        type: object
-                        properties:
-                          name:
-                            type: string
-                          namespace:
-                            type: string
-                          key:
-                            type: string
           status:
             type: object
             description: Observed state for IdentityCenter.
@@ -288,7 +261,7 @@ spec:
               identityStore:
                 type: object
                 properties:
-                  identityStoreId:
+                  id:
                     type: string
                   users:
                     type: array

@@ -35,65 +35,92 @@ spec:
 
 ## Example Composite
 
-```yaml
+**Minimal example:**
+
 ```yaml
 apiVersion: aws.hops.ops.com.ai/v1alpha1
 kind: IdentityCenter
 metadata:
   name: platform-sso
-  namespace: example-env
+  namespace: default
+spec:
+  managementPolicies: ["*"]
+  providerConfigName: aws-provider
+  identityCenter:
+    instanceArn: arn:aws:sso:::instance/ssoins-1234567890abcdef
+  identityStore:
+    id: d-1234567890
+  groups:
+    - name: Admins
+  users:
+    - username: admin
+      email: admin@example.com
+      groups: [Admins]
+  permissionSets:
+    - name: AdminAccess
+      managedPolicies:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      assignToGroups: [Admins]
+      assignToAccounts: ["123456789012"]
+```
+
+**Complete example with all options:**
+
+```yaml
+apiVersion: aws.hops.ops.com.ai/v1alpha1
+kind: IdentityCenter
+metadata:
+  name: platform-sso
+  namespace: default
 spec:
   organizationName: platform
   managementMode: self
-  forProvider:
-    rootAccountRef:
-      name: hops-root
-    identityCenter:
-      providerConfig: identity-center
-      instanceArn: arn:aws:sso:::instance/ssoins-1234567890abcdef
-      sessionDuration: PT2H
-    identityStore:
-      providerConfig: identity-center
-      identityStoreId: d-1234567890
-    groups:
-      - name: Admins
-        displayName: Platform Admins
-      - name: Developers
-        displayName: Platform Developers
-    localUsers:
-      - username: admin
-        email: admin@example.com
-        firstName: Admin
-        lastName: User
-        groups: [Admins]
-      - username: dev-1
-        email: dev1@example.com
-        firstName: Dev
-        lastName: One
-        groups: [Developers]
-    permissionSets:
-      - name: HopsAdministratorAccess
-        description: Full admin – use sparingly
-        managedPolicies:
-          - arn:aws:iam::aws:policy/AdministratorAccess
-        assignToGroups: [Admins]
-        assignToAccounts: ["123456789012"]
-      - name: HopsDeveloperAccess
-        description: Safe developer defaults
-        sessionDuration: PT8H
-        managedPolicies:
-          - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
-          - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
-        inlinePolicy: |
-          {
-            "Version": "2012-10-17",
-            "Statement": [
-              {"Effect": "Deny", "Action": ["iam:*", "aws-portal:*"], "Resource": "*"}
-            ]
-          }
-        assignToGroups: [Developers]
-        assignToAccounts: ["210987654321"]
-```
+  managementPolicies: ["*"]
+  providerConfigName: aws-provider
+  identityCenter:
+    instanceArn: arn:aws:sso:::instance/ssoins-1234567890abcdef
+    sessionDuration: PT2H
+    relayState: https://console.aws.amazon.com/
+  identityStore:
+    id: d-1234567890
+  groups:
+    - name: Admins
+      displayName: Platform Admins
+    - name: Developers
+      displayName: Platform Developers
+  users:
+    - username: admin
+      email: admin@example.com
+      firstName: Admin
+      lastName: User
+      groups: [Admins]
+    - username: dev-1
+      email: dev1@example.com
+      firstName: Dev
+      lastName: One
+      groups: [Developers]
+  permissionSets:
+    - name: HopsAdministratorAccess
+      description: Full admin – use sparingly
+      managedPolicies:
+        - arn:aws:iam::aws:policy/AdministratorAccess
+      assignToGroups: [Admins]
+      assignToAccounts: ["123456789012"]
+    - name: HopsDeveloperAccess
+      description: Safe developer defaults
+      sessionDuration: PT8H
+      managedPolicies:
+        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+      inlinePolicy: |
+        {
+          "Version": "2012-10-17",
+          "Statement": [
+            {"Effect": "Deny", "Action": ["iam:*", "aws-portal:*"], "Resource": "*"}
+          ]
+        }
+      assignToGroups: [Developers]
+      assignToAccounts: ["210987654321"]
 ```
 
 This renders the Identity Store users/groups (plus GroupMemberships), then the permission sets, inline or managed policy attachments, optional customer managed policy attachments, and the account assignments derived from `assignTo*`. Logical names are slugified automatically so you can keep AWS-friendly display names.
@@ -104,8 +131,9 @@ This renders the Identity Store users/groups (plus GroupMemberships), then the p
 - `make build` – rebuild the configuration package via `up project build`.
 - `make render` / `make render-all` – render examples with `up composition render`.
 - `make validate` – validate the XRD + examples with `crossplane beta validate`.
-- `make test` – run `up test run tests/*`.
+- `make test` – run `up test run tests/test-*`.
 - `make publish tag=<version>` – build and push configuration + render function images.
+- `make e2e` – execute the AWS-backed suite under `tests/e2etest-identity-center` (requires valid `aws-creds` and instance metadata).
 
 Update the schema, examples, tests, README, and `AGENTS.md` together whenever you add new inputs.
 

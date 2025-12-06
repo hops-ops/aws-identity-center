@@ -3,29 +3,25 @@
 {{ $xr := getCompositeResource . }}
 {{ $metadata := $xr.metadata | default (dict) }}
 {{ $spec := $xr.spec | default (dict) }}
-{{ $forProvider := $spec.forProvider | default (dict) }}
 
 {{ $organizationName := $spec.organizationName | default ($metadata.name | default "identity-center") }}
 {{ $managementMode := $spec.managementMode | default "self" }}
 {{ $deletionPolicy := $spec.deletionPolicy | default "Delete" }}
 {{ $managementPolicies := $spec.managementPolicies | default (list "*") }}
 
-{{ $rootAccountRef := $forProvider.rootAccountRef | default (dict) }}
-{{ $providerConfigName := $spec.providerConfigName | default $rootAccountRef.name | default $organizationName | default "default" }}
+{{ $providerConfigName := $spec.providerConfigName | default $organizationName | default "default" }}
 
-{{ $identityCenter := $forProvider.identityCenter | default (dict) }}
-{{ $identityCenterProviderConfig := $identityCenter.providerConfig | default $providerConfigName }}
+{{ $identityCenter := $spec.identityCenter | default (dict) }}
 {{ $identityCenterInstanceArn := $identityCenter.instanceArn | default "" }}
 {{ $identityCenterRelayState := $identityCenter.relayState }}
 {{ $identityCenterSessionDuration := $identityCenter.sessionDuration | default "PT1H" }}
 {{ $defaultAWSTags := dict "hops" "true" "organization" $organizationName }}
 {{ $identityCenterTags := merge $defaultAWSTags ($identityCenter.tags | default (dict)) }}
 
-{{ $identityStore := $forProvider.identityStore | default (dict) }}
-{{ $identityStoreProviderConfig := $identityStore.providerConfig | default $identityCenterProviderConfig }}
-{{ $identityStoreId := $identityStore.identityStoreId | default "" }}
+{{ $identityStore := $spec.identityStore | default (dict) }}
+{{ $identityStoreId := $identityStore.id | default "" }}
 
-{{ $groups := $forProvider.groups | default (list) }}
+{{ $groups := $spec.groups | default (list) }}
 {{ $groupResourceNames := dict }}
 {{ range $groups }}
   {{- $groupName := .name }}
@@ -35,9 +31,9 @@
   {{- end }}
 {{ end }}
 
-{{ $localUsers := $forProvider.localUsers | default (list) }}
+{{ $users := $spec.users | default (list) }}
 {{ $userResourceNames := dict }}
-{{ range $localUsers }}
+{{ range $users }}
   {{- $username := .username }}
   {{- if and $username $identityStoreId }}
     {{- $userSlug := regexReplaceAll "[^a-z0-9-]" (lower $username) "-" }}
@@ -45,7 +41,7 @@
   {{- end }}
 {{ end }}
 
-{{ $permissionSets := $forProvider.permissionSets | default (list) }}
+{{ $permissionSets := $spec.permissionSets | default (list) }}
 {{ $permissionSetResourceNames := dict }}
 {{ range $permissionSets }}
   {{- $permissionSetName := .name }}
@@ -116,12 +112,12 @@
   {{- end }}
 {{ end }}
 
-{{ $localUserGroupMemberships := dict }}
-{{ range $user := $localUsers }}
+{{ $userGroupMemberships := dict }}
+{{ range $user := $users }}
   {{- $username := $user.username }}
   {{- if $username }}
-    {{- $_ := set $localUserGroupMemberships $username ($user.groups | default (list)) }}
+    {{- $_ := set $userGroupMemberships $username ($user.groups | default (list)) }}
   {{- end }}
 {{ end }}
 
-{{ $externalIdP := $forProvider.externalIdP | default (dict) }}
+{{ $externalIdP := $spec.externalIdP | default (dict) }}

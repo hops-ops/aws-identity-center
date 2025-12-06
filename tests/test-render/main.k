@@ -20,7 +20,7 @@ _items = [
                     apiVersion: "identitystore.aws.m.upbound.io/v1beta1"
                     kind: "Group"
                     metadata: {
-                        name: "platform-ic-group-admins"
+                        name: "platform-sso-ic-group-admins"
                     }
                     spec: {
                         forProvider: {
@@ -33,7 +33,7 @@ _items = [
                     apiVersion: "identitystore.aws.m.upbound.io/v1beta1"
                     kind: "User"
                     metadata: {
-                        name: "platform-ic-user-platform-admin"
+                        name: "platform-sso-ic-user-platform-admin"
                         labels: {
                             'aws.hops.ops.com.ai/identity-center-user': "platform-admin"
                         }
@@ -49,6 +49,10 @@ _items = [
                                     value: "platform-admin@example.com"
                                 }
                             ]
+                            name: {
+                                givenName: "Platform"
+                                familyName: "Admin"
+                            }
                         }
                     }
                 },
@@ -56,16 +60,16 @@ _items = [
                     apiVersion: "identitystore.aws.m.upbound.io/v1beta1"
                     kind: "GroupMembership"
                     metadata: {
-                        name: "platform-ic-membership-platform-admin-admins"
+                        name: "platform-sso-ic-membership-platform-admin-admins"
                     }
                     spec: {
                         forProvider: {
                             identityStoreId: "d-1234567890"
                             memberIdRef: {
-                                name: "platform-ic-user-platform-admin"
+                                name: "platform-sso-ic-user-platform-admin"
                             }
                             groupIdRef: {
-                                name: "platform-ic-group-admins"
+                                name: "platform-sso-ic-group-admins"
                             }
                         }
                     }
@@ -74,19 +78,19 @@ _items = [
                     apiVersion: "ssoadmin.aws.m.upbound.io/v1beta1"
                     kind: "PermissionSet"
                     metadata: {
-                        name: "platform-hopsadministratoraccess-permissionset"
+                        name: "platform-sso-adminaccess-permissionset"
                         labels: {
-                            'aws.hops.ops.com.ai/identity-center-permission-set': "hopsadministratoraccess"
+                            'aws.hops.ops.com.ai/identity-center-permission-set': "adminaccess"
                         }
                     }
                     spec: {
                         forProvider: {
-                            name: "HopsAdministratorAccess"
+                            name: "AdminAccess"
                             instanceArn: "arn:aws:sso:::instance/ssoins-1234567890abcdef"
                             sessionDuration: "PT2H"
                             tags: {
                                 hops: "true"
-                                organization: "platform"
+                                organization: "platform-sso"
                             }
                         }
                     }
@@ -95,11 +99,14 @@ _items = [
                     apiVersion: "ssoadmin.aws.m.upbound.io/v1beta1"
                     kind: "PermissionSetManagedPolicyAttachment"
                     metadata: {
-                        name: "platform-hopsadministratoraccess-permissionset-managed-0"
+                        name: "platform-sso-adminaccess-permissionset-managed-0"
                     }
                     spec: {
                         forProvider: {
                             managedPolicyArn: "arn:aws:iam::aws:policy/AdministratorAccess"
+                            permissionSetArnRef: {
+                                name: "platform-sso-adminaccess-permissionset"
+                            }
                         }
                     }
                 },
@@ -107,14 +114,17 @@ _items = [
                     apiVersion: "ssoadmin.aws.m.upbound.io/v1beta1"
                     kind: "AccountAssignment"
                     metadata: {
-                        name: "platform-hopsadministratoraccess-permissionset-assignment-0"
+                        name: "platform-sso-adminaccess-permissionset-assignment-0"
                     }
                     spec: {
                         forProvider: {
+                            permissionSetArnRef: {
+                                name: "platform-sso-adminaccess-permissionset"
+                            }
                             targetId: "123456789012"
                             principalType: "GROUP"
                             principalIdRef: {
-                                name: "platform-ic-group-admins"
+                                name: "platform-sso-ic-group-admins"
                             }
                         }
                     }

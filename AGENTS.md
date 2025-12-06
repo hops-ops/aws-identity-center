@@ -13,17 +13,23 @@ This repository publishes the `IdentityCenter` configuration package. Use this g
 
 ## Contract Overview
 
-`apis/identitycenters/definition.yaml` defines the namespaced `IdentityCenter` XRD:
+`apis/identitycenters/definition.yaml` defines the namespaced `IdentityCenter` XRD with a flattened, developer-friendly API:
 
 - `spec.organizationName` defaults to `metadata.name` and feeds naming/tagging.
-- `spec.managementMode` toggles self vs managed operation. `spec.managementPolicies` still defaults to `["*"]` and fans out to every rendered resource.
-- `spec.forProvider.rootAccountRef` points at the `Account` composite that created the customer's AWS organization. Provider configs default to this name unless the caller overrides `spec.providerConfigName` or the per-block providerConfig values.
-- `spec.forProvider.identityCenter` carries the Identity Center instance ARN plus optional relay state, session duration, and tag overrides.
-- `spec.forProvider.identityStore` sets the provider config + identity store ID when rendering groups/users.
-- `spec.forProvider.groups[]` / `localUsers[]` declare Identity Store principals. Users can list the group names they should join; the templates emit `GroupMembership` resources automatically.
-- `spec.forProvider.permissionSets[]` describes the permission set along with inline policies, managed policy ARNs, customer-managed policy references, and assignment intent (`assignToAccounts`, `assignToGroups`, `assignToUsers`). A legacy `assignments[]` block exists for bespoke tuples.
+- `spec.managementMode` toggles self vs managed operation. `spec.managementPolicies` defaults to `["*"]` and fans out to every rendered resource.
+- `spec.providerConfigName` specifies the AWS ProviderConfig used for all API calls. Defaults to `metadata.name`.
+- `spec.identityCenter` carries the Identity Center instance ARN plus optional relay state, session duration, and tag overrides. If `instanceArn` is not provided, the composition should create a new instance (TODO: instance creation template).
+- `spec.identityStore` sets the identity store ID when rendering groups/users. If not provided, it will be derived from the Identity Center instance.
+- `spec.groups[]` / `spec.users[]` declare Identity Store principals at the top level. Users can list the group names they should join; the templates emit `GroupMembership` resources automatically.
+- `spec.permissionSets[]` (optional) describes permission sets along with inline policies, managed policy ARNs, customer-managed policy references, and assignment intent (`assignToAccounts`, `assignToGroups`, `assignToUsers`). A legacy `assignments[]` block exists for bespoke tuples.
 - `spec.externalIdP` (reserved for Authentik/Okta) is defined but currently a no-op.
 - Status surfaces the resolved management mode, Identity Center instance ARN, identity store object IDs, and assignment metadata so platform teams can trace readiness from `kubectl get`.
+
+**Key simplifications from v1:**
+- Removed `spec.forProvider` wrapper – all fields now at top level under `spec`
+- Removed `spec.forProvider.rootAccountRef` – use `providerConfigName` instead
+- Removed per-resource providerConfigs (`identityCenter.providerConfig`, `identityStore.providerConfig`) – use single `spec.providerConfigName` for all AWS resources
+- Made `permissionSets` optional to support minimal setups
 
 When introducing new schema knobs, update the XRD, README, examples, tests, and templates in the same change.
 
@@ -31,10 +37,11 @@ When introducing new schema knobs, update the XRD, README, examples, tests, and 
 
 - Gather all shared values in `functions/render/00-desired-values.yaml.gotmpl`. Default aggressively using `default`, `merge`, etc., so later templates never dereference nil values.
 - Mirror the pipeline outlined in `docs/plan/03-identity-center.md`: `00-desired-values`, `10-observed-values`, `20-groups`, `30-users`, `40-permission-sets`, `50-account-assignments`, `60-external-idp`, `98-usages`, `99-status`. Leave plenty of numbering gaps for future growth.
-- Only render Identity Store resources when an `identityStoreId` is present. Users without an identity store block should still get permission sets and assignments (use external identifiers).
+- Only render Identity Store resources when an `identityStore.id` is present. Users without an identity store block should still get permission sets and assignments (use external identifiers).
 - Generate `identitystore.aws.m.upbound.io/v1beta1, Kind=GroupMembership` resources whenever a local user references one or more groups. Use `groupIdRef` and `memberIdRef` so Crossplane resolves the IDs.
 - Use `setResourceNameAnnotation` to assign stable logical names (`identity-center-user-<name>`, `permission-set-<name>`, etc.). Observed-state and Usage gating rely on these annotations.
 - Always include `managementPolicies` and `providerConfigRef.kind: ProviderConfig` on managed resources to stay compliant with Crossplane 2.0 expectations.
+- Target Crossplane 2+: skip `deletionPolicy` on managed resources; rely on `managementPolicies` and defaults.
 - Merge caller-supplied tag maps with the default `{"hops": "true", "organization": <name>}` map before applying them to permission sets and propagated resources.
 
 ## Testing
@@ -46,7 +53,16 @@ When introducing new schema knobs, update the XRD, README, examples, tests, and 
 
 Use additional examples under `examples/identitycenters/` plus new assertions when adding behaviour.
 
-Run `make test` (or `up test run tests/*`) after touching templates or schema. Tests should focus on behaviour—assert only the fields that should never change.
+Run `make test` (or `up test run tests/test-*`) after touching templates or schema. Tests should focus on behaviour—assert only the fields that should never change.
+
+### E2E suite
+
+`tests/e2etest-identity-center/main.k` provisions a real `IdentityCenter` composite and validates it against AWS. To run it locally:
+
+1. Provide disposable AWS credentials via `tests/e2etest-identity-center/aws-creds` (gitignored). The file should contain a `[default]` profile understood by the AWS SDK (same format used by `aws configure`).
+2. Update the `_instance_arn`, `_identity_store_id`, and `_target_account` constants in `main.k` so they point at the Identity Center instance dedicated to e2e.
+3. Run `make e2e` (or `up test run tests/e2etest-identity-center --e2e`). The harness injects the `aws-creds` Secret and creates an `aws.m.upbound.io/v1beta1, Kind=ProviderConfig` so the composition can authenticate.
+4. Keep `aws-creds` out of git—it's ignored on purpose. Rotate the credentials frequently since this suite touches IAM Identity Center.
 
 ## Tooling & Automation
 
