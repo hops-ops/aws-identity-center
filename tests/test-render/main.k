@@ -44,11 +44,11 @@ _items = [
                             identityStoreId: "d-1234567890"
                             displayName: "Platform Admin"
                             userName: "platform-admin"
-                            emails: [
-                                {
-                                    value: "platform-admin@example.com"
-                                }
-                            ]
+                            emails: {
+                                value: "platform-admin@example.com"
+                                type: "work"
+                                primary: True
+                            }
                             name: {
                                 givenName: "Platform"
                                 familyName: "Admin"
@@ -97,7 +97,7 @@ _items = [
                 },
                 {
                     apiVersion: "ssoadmin.aws.m.upbound.io/v1beta1"
-                    kind: "PermissionSetManagedPolicyAttachment"
+                    kind: "ManagedPolicyAttachment"
                     metadata: {
                         name: "platform-sso-adminaccess-permissionset-managed-0"
                     }
@@ -123,7 +123,7 @@ _items = [
                             }
                             targetId: "123456789012"
                             principalType: "GROUP"
-                            principalIdRef: {
+                            principalIdFromGroupRef: {
                                 name: "platform-sso-ic-group-admins"
                             }
                         }
@@ -190,9 +190,6 @@ _items = [
                     spec: {
                         forProvider: {
                             principalType: "USER"
-                            principalIdRef: {
-                                name: "workloads-ic-user-workloads-reader"
-                            }
                             targetId: "999999999999"
                         }
                     }
