@@ -8,6 +8,8 @@
     {{- if and $username $resourceName }}
       {{- $displayName := $user.displayName | default (trim (printf "%s %s" ($user.firstName | default "") ($user.lastName | default ""))) | default $username }}
       {{- $userLabels := merge (dict "hops.ops.com.ai/organization" $organizationName "aws.hops.ops.com.ai/identity-center-user" (regexReplaceAll "[^a-z0-9-]" (lower $username) "-")) ($user.tags | default (dict)) }}
+      {{- $userMgmtPolicies := index $userManagementPolicies $username | default $managementPolicies }}
+      {{- $userExtName := index $userExternalNames $username | default "" }}
 
 ---
 
@@ -17,10 +19,13 @@ metadata:
   name: {{ $resourceName }}
   annotations:
     {{ setResourceNameAnnotation (printf "identity-center-user-%s" $username) }}
+    {{- if $userExtName }}
+    crossplane.io/external-name: {{ $userExtName | quote }}
+    {{- end }}
   labels:
     {{- toYaml $userLabels | nindent 4 }}
 spec:
-  managementPolicies: {{ toYaml $managementPolicies | nindent 4 }}
+  managementPolicies: {{ toYaml $userMgmtPolicies | nindent 4 }}
   forProvider:
     identityStoreId: {{ $identityStoreId }}
     displayName: {{ $displayName }}
@@ -62,7 +67,7 @@ metadata:
   annotations:
     {{ setResourceNameAnnotation (printf "identity-center-group-membership-%s-%s" $username $groupName) }}
 spec:
-  managementPolicies: {{ toYaml $managementPolicies | nindent 4 }}
+  managementPolicies: {{ toYaml $userMgmtPolicies | nindent 4 }}
   forProvider:
     identityStoreId: {{ $identityStoreId }}
     memberIdRef:

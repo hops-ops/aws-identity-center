@@ -6,16 +6,27 @@ import models.ai.com.ops.hops.aws.v1alpha1 as awsv1alpha1
 import models.io.upbound.dev.meta.v1alpha1 as metav1alpha1
 
 _now = str(int(math.floor(datetime.ticks())))
-_test_name = "identity-center-" + _now
-_provider_name = _test_name + "-provider"
 
-# Update these identifiers to match the AWS Identity Center instance used for e2e.
+_creds = file.read("secrets/aws-creds")
+_base64_creds = base64.encode(_creds)
+
+# =============================================================================
+# Identity Center instance - AWS only allows one per organization
+# Get these values from AWS Console or CLI:
+#   aws sso-admin list-instances
+# =============================================================================
 _instance_arn = "arn:aws:sso:::instance/ssoins-CHANGE-ME"
 _identity_store_id = "d-CHANGE-ME"
-_target_account = "123456789012"
+_target_account = "123456789012"  # Account to test assignments against
+_region = "us-east-1"
 
-_creds = file.read("aws-creds")
-_base64_creds = base64.encode(_creds)
+# =============================================================================
+# Dynamic test resources - timestamped to allow concurrent test runs
+# =============================================================================
+_test_org_name = "hops-e2etest-ic-" + _now
+_test_group_name = "E2ETestGroup-" + _now
+_test_user_name = "e2e-test-user-" + _now
+_test_permission_set_name = "E2ETest-" + _now
 
 _items = [
     metav1alpha1.E2ETest{
@@ -26,14 +37,15 @@ _items = [
             manifests: [
                 awsv1alpha1.IdentityCenter{
                     metadata: {
-                        name: "e2etest-identity-center"
+                        name: _test_org_name
                         namespace: "default"
                     }
                     spec: {
-                        organizationName: _test_name
+                        organizationName: _test_org_name
                         managementMode: "self"
                         managementPolicies: ["*"]
-                        providerConfigName: _provider_name
+                        providerConfigName: "default"
+                        region: _region
                         identityCenter: {
                             instanceArn: _instance_arn
                             sessionDuration: "PT2H"
@@ -43,27 +55,27 @@ _items = [
                         }
                         groups: [
                             {
-                                name: "E2EAdmins"
-                                displayName: "E2E Admins"
+                                name: _test_group_name
+                                displayName: "E2E Test Group " + _now
                             }
                         ]
                         users: [
                             {
-                                username: "e2e-admin"
-                                email: "e2e-admin@example.com"
+                                username: _test_user_name
+                                email: "e2e-test-" + _now + "@ops.com.ai"
                                 firstName: "E2E"
-                                lastName: "Admin"
-                                groups: ["E2EAdmins"]
+                                lastName: "Test"
+                                groups: [_test_group_name]
                             }
                         ]
                         permissionSets: [
                             {
-                                name: "E2EAdministratorAccess"
-                                description: "Full admin access for IdentityCenter e2e validation"
+                                name: _test_permission_set_name
+                                description: "E2E test permission set - " + _now
                                 managedPolicies: [
-                                    "arn:aws:iam::aws:policy/AdministratorAccess"
+                                    "arn:aws:iam::aws:policy/ViewOnlyAccess"
                                 ]
-                                assignToGroups: ["E2EAdmins"]
+                                assignToGroups: [_test_group_name]
                                 assignToAccounts: [_target_account]
                             }
                         ]
@@ -86,7 +98,7 @@ _items = [
                     apiVersion: "aws.m.upbound.io/v1beta1"
                     kind: "ProviderConfig"
                     metadata: {
-                        name: _provider_name
+                        name: "default"
                         namespace: "default"
                     }
                     spec: {

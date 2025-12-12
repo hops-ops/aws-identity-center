@@ -24,31 +24,49 @@
 
 {{ $groups := $spec.groups | default (list) }}
 {{ $groupResourceNames := dict }}
+{{ $groupManagementPolicies := dict }}
+{{ $groupExternalNames := dict }}
 {{ range $groups }}
   {{- $groupName := .name }}
   {{- if and $groupName $identityStoreId }}
     {{- $groupSlug := regexReplaceAll "[^a-z0-9-]" (lower $groupName) "-" }}
     {{- $_ := set $groupResourceNames $groupName (printf "%s-ic-group-%s" $organizationName $groupSlug) }}
+    {{- $_ := set $groupManagementPolicies $groupName (.managementPolicies | default $managementPolicies) }}
+    {{- if .externalName }}
+      {{- $_ := set $groupExternalNames $groupName .externalName }}
+    {{- end }}
   {{- end }}
 {{ end }}
 
 {{ $users := $spec.users | default (list) }}
 {{ $userResourceNames := dict }}
+{{ $userManagementPolicies := dict }}
+{{ $userExternalNames := dict }}
 {{ range $users }}
   {{- $username := .username }}
   {{- if and $username $identityStoreId }}
     {{- $userSlug := regexReplaceAll "[^a-z0-9-]" (lower $username) "-" }}
     {{- $_ := set $userResourceNames $username (printf "%s-ic-user-%s" $organizationName $userSlug) }}
+    {{- $_ := set $userManagementPolicies $username (.managementPolicies | default $managementPolicies) }}
+    {{- if .externalName }}
+      {{- $_ := set $userExternalNames $username .externalName }}
+    {{- end }}
   {{- end }}
 {{ end }}
 
 {{ $permissionSets := $spec.permissionSets | default (list) }}
 {{ $permissionSetResourceNames := dict }}
+{{ $permissionSetManagementPolicies := dict }}
+{{ $permissionSetExternalNames := dict }}
 {{ range $permissionSets }}
   {{- $permissionSetName := .name }}
   {{- if $permissionSetName }}
     {{- $permissionSetSlug := regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-" }}
     {{- $_ := set $permissionSetResourceNames $permissionSetName (printf "%s-%s-permissionset" $organizationName $permissionSetSlug) }}
+    {{- $_ := set $permissionSetManagementPolicies $permissionSetName (.managementPolicies | default $managementPolicies) }}
+    {{- if .externalName }}
+      {{- $_ := set $permissionSetExternalNames $permissionSetName .externalName }}
+    {{- end }}
   {{- end }}
 {{ end }}
 

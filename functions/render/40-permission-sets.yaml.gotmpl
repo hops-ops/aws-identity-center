@@ -8,12 +8,14 @@
     {{- $relayState := $permissionSet.relayState | default $identityCenterRelayState }}
     {{- $sessionDuration := $permissionSet.sessionDuration | default $identityCenterSessionDuration }}
     {{- $inlinePolicy := $permissionSet.inlinePolicy }}
-    {{- $managedPolicies := $permissionSet.managedPolicies | default (list) }}
+    {{- $awsManagedPolicies := $permissionSet.managedPolicies | default (list) }}
     {{- $customerManagedPolicies := $permissionSet.customerManagedPolicies | default (list) }}
     {{- $permissionSetResourceName := index $permissionSetResourceNames $permissionSetName | default (printf "%s-%s-permissionset" $organizationName (regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-")) }}
     {{- $permissionSetLabelValue := regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-" }}
     {{- $permissionSetLabels := dict "hops.ops.com.ai/organization" $organizationName "aws.hops.ops.com.ai/identity-center-permission-set" $permissionSetLabelValue }}
     {{- $permissionSetTags := merge $identityCenterTags ($permissionSet.tags | default (dict)) }}
+    {{- $psMgmtPolicies := index $permissionSetManagementPolicies $permissionSetName | default $managementPolicies }}
+    {{- $psExtName := index $permissionSetExternalNames $permissionSetName | default "" }}
 
 ---
 
@@ -23,10 +25,13 @@ metadata:
   name: {{ $permissionSetResourceName }}
   annotations:
     {{ setResourceNameAnnotation (printf "permission-set-%s" $permissionSetName) }}
+    {{- if $psExtName }}
+    crossplane.io/external-name: {{ $psExtName | quote }}
+    {{- end }}
   labels:
     {{- toYaml $permissionSetLabels | nindent 4 }}
 spec:
-  managementPolicies: {{ toYaml $managementPolicies | nindent 4 }}
+  managementPolicies: {{ toYaml $psMgmtPolicies | nindent 4 }}
   forProvider:
     instanceArn: {{ $identityCenterInstanceArn }}
     name: {{ $permissionSetName }}
@@ -59,7 +64,7 @@ metadata:
   labels:
     {{- toYaml $permissionSetLabels | nindent 4 }}
 spec:
-  managementPolicies: {{ toYaml $managementPolicies | nindent 4 }}
+  managementPolicies: {{ toYaml $psMgmtPolicies | nindent 4 }}
   forProvider:
     instanceArn: {{ $identityCenterInstanceArn }}
     inlinePolicy: |
@@ -75,8 +80,8 @@ spec:
 
     {{- end }}
 
-    {{- range $mpIndex, $managedPolicy := $managedPolicies }}
-      {{- if $managedPolicy }}
+    {{- range $mpIndex, $awsManagedPolicy := $awsManagedPolicies }}
+      {{- if $awsManagedPolicy }}
 
 ---
 
@@ -89,10 +94,10 @@ metadata:
   labels:
     {{- toYaml $permissionSetLabels | nindent 4 }}
 spec:
-  managementPolicies: {{ toYaml $managementPolicies | nindent 4 }}
+  managementPolicies: {{ toYaml $psMgmtPolicies | nindent 4 }}
   forProvider:
     instanceArn: {{ $identityCenterInstanceArn }}
-    managedPolicyArn: {{ $managedPolicy }}
+    managedPolicyArn: {{ $awsManagedPolicy }}
     permissionSetArnRef:
       name: {{ $permissionSetResourceName }}
     {{- if $region }}
@@ -119,7 +124,7 @@ metadata:
   labels:
     {{- toYaml $permissionSetLabels | nindent 4 }}
 spec:
-  managementPolicies: {{ toYaml $managementPolicies | nindent 4 }}
+  managementPolicies: {{ toYaml $psMgmtPolicies | nindent 4 }}
   forProvider:
     instanceArn: {{ $identityCenterInstanceArn }}
     permissionSetArnRef:

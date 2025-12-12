@@ -9,6 +9,8 @@
       {{- $displayName := $group.displayName | default $groupName }}
       {{- $groupSlug := regexReplaceAll "[^a-z0-9-]" (lower $groupName) "-" }}
       {{- $groupLabels := merge (dict "hops.ops.com.ai/organization" $organizationName "aws.hops.ops.com.ai/identity-center-group" $groupSlug) ($group.tags | default (dict)) }}
+      {{- $groupMgmtPolicies := index $groupManagementPolicies $groupName | default $managementPolicies }}
+      {{- $groupExtName := index $groupExternalNames $groupName | default "" }}
 
 ---
 
@@ -18,10 +20,13 @@ metadata:
   name: {{ $resourceName }}
   annotations:
     {{ setResourceNameAnnotation (printf "identity-center-group-%s" $groupName) }}
+    {{- if $groupExtName }}
+    crossplane.io/external-name: {{ $groupExtName | quote }}
+    {{- end }}
   labels:
     {{- toYaml $groupLabels | nindent 4 }}
 spec:
-  managementPolicies: {{ toYaml $managementPolicies | nindent 4 }}
+  managementPolicies: {{ toYaml $groupMgmtPolicies | nindent 4 }}
   forProvider:
     identityStoreId: {{ $identityStoreId }}
     displayName: {{ $displayName }}

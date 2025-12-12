@@ -9,6 +9,13 @@ on:
       - opened
       - reopened
       - synchronize
+    paths:
+      - 'apis/**'
+      - 'examples/**'
+      - 'tests/**'
+      - 'functions/**'
+      - '.github/workflows/on-pr.yaml'
+      - 'upbound.yaml'
 
 permissions:
   packages: write
@@ -18,24 +25,32 @@ permissions:
 
 jobs:
   validate:
-    uses: unbounded-tech/workflows-crossplane/.github/workflows/validate.yaml@v0.8.0
+    uses: unbounded-tech/workflows-crossplane/.github/workflows/validate.yaml@v1.0.0
     with:
       examples: |
         [
-          "examples/identitycenters/example-minimal.yaml",
-          "examples/identitycenters/example-groups.yaml"
+          { "example": "examples/identitycenters/example-minimal.yaml" },
+          { "example": "examples/identitycenters/example-groups.yaml" }
         ]
       api_path: apis/identitycenters
       error_on_missing_schemas: true
 
   test:
-    uses: unbounded-tech/workflows-crossplane/.github/workflows/test.yaml@v0.8.0
+    uses: unbounded-tech/workflows-crossplane/.github/workflows/test.yaml@v1.0.0
+
+  e2e:
+    uses: unbounded-tech/workflows-crossplane/.github/workflows/e2e-aws.yaml@v1.0.0
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    with:
+      timeout-minutes: 30
 
   publish:
     needs:
       - validate
       - test
-    uses: unbounded-tech/workflows-crossplane/.github/workflows/publish.yaml@v0.8.0
+    uses: unbounded-tech/workflows-crossplane/.github/workflows/publish.yaml@v1.0.0
     secrets: inherit
     with:
       tag: pr-${{ github.event.pull_request.number }}-${{ github.sha }}

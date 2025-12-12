@@ -98,6 +98,25 @@ spec:
                       type: string
                     description:
                       type: string
+                    externalName:
+                      type: string
+                      description: |
+                        Identity Store Group ID to adopt (e.g., 94815e08-...).
+                        When set, Crossplane imports the existing group instead of creating a new one.
+                    managementPolicies:
+                      type: array
+                      description: |
+                        ManagementPolicies for this group. Overrides spec.managementPolicies if set.
+                        Use to orphan specific groups on deletion while deleting others.
+                      items:
+                        type: string
+                        enum:
+                        - "*"
+                        - Create
+                        - Observe
+                        - Update
+                        - Delete
+                        - LateInitialize
                     tags:
                       type: object
                       description: Extra labels mirrored onto the metadata.labels map.
@@ -122,6 +141,25 @@ spec:
                       type: string
                     displayName:
                       type: string
+                    externalName:
+                      type: string
+                      description: |
+                        Identity Store User ID to adopt (e.g., 84815e08-...).
+                        When set, Crossplane imports the existing user instead of creating a new one.
+                    managementPolicies:
+                      type: array
+                      description: |
+                        ManagementPolicies for this user. Overrides spec.managementPolicies if set.
+                        Use to orphan specific users on deletion while deleting others.
+                      items:
+                        type: string
+                        enum:
+                        - "*"
+                        - Create
+                        - Observe
+                        - Update
+                        - Delete
+                        - LateInitialize
                     groups:
                       type: array
                       description: Group names the user should join.
@@ -148,6 +186,25 @@ spec:
                       type: string
                     sessionDuration:
                       type: string
+                    externalName:
+                      type: string
+                      description: |
+                        Permission Set ARN to adopt (e.g., arn:aws:sso:::permissionSet/ssoins-.../ps-...).
+                        When set, Crossplane imports the existing permission set instead of creating a new one.
+                    managementPolicies:
+                      type: array
+                      description: |
+                        ManagementPolicies for this permission set. Overrides spec.managementPolicies if set.
+                        Use to orphan specific permission sets on deletion while deleting others.
+                      items:
+                        type: string
+                        enum:
+                        - "*"
+                        - Create
+                        - Observe
+                        - Update
+                        - Delete
+                        - LateInitialize
                     inlinePolicy:
                       type: string
                       description: Inline JSON policy document attached to the permission set.

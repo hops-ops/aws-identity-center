@@ -7,6 +7,7 @@
     {{- $permissionSetResourceName := index $permissionSetResourceNames $permissionSetName | default (printf "%s-%s-permissionset" $organizationName (regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-")) }}
     {{- $permissionSetLabelValue := regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-" }}
     {{- $permissionSetLabels := dict "hops.ops.com.ai/organization" $organizationName "aws.hops.ops.com.ai/identity-center-permission-set" $permissionSetLabelValue }}
+    {{- $psMgmtPolicies := index $permissionSetManagementPolicies $permissionSetName | default $managementPolicies }}
     {{- $assignments := get $permissionSetAssignments $permissionSetName | default (list) }}
 
     {{- range $assignIndex, $assignment := $assignments }}
@@ -33,7 +34,7 @@ metadata:
   labels:
     {{- toYaml $permissionSetLabels | nindent 4 }}
 spec:
-  managementPolicies: {{ toYaml $managementPolicies | nindent 4 }}
+  managementPolicies: {{ toYaml $psMgmtPolicies | nindent 4 }}
   forProvider:
     instanceArn: {{ $identityCenterInstanceArn }}
     permissionSetArnRef:
