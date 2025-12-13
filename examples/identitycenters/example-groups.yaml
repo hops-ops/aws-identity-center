@@ -9,11 +9,10 @@ spec:
   managementPolicies: ["*"]
   providerConfigName: aws-provider
   region: us-east-1
+  identityStoreId: d-0987654321
   identityCenter:
     instanceArn: arn:aws:sso:::instance/ssoins-abcdef0123456789
     relayState: https://console.aws.amazon.com/
-  identityStore:
-    id: d-0987654321
   groups:
     - name: WorkloadsEngineering
       displayName: Workloads Engineering

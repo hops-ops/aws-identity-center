@@ -36,6 +36,9 @@ spec:
     {{- if $group.description }}
     description: {{ $group.description }}
     {{- end }}
+    {{- with $group.forProvider }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
   providerConfigRef:
     kind: ProviderConfig
     name: {{ $providerConfigName }}

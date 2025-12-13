@@ -48,6 +48,9 @@ spec:
       type: work
       primary: true
     {{- end }}
+    {{- with $user.forProvider }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
   providerConfigRef:
     kind: ProviderConfig
     name: {{ $providerConfigName }}

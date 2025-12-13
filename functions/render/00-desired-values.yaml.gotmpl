@@ -19,8 +19,7 @@
 {{ $defaultAWSTags := dict "hops" "true" "organization" $organizationName }}
 {{ $identityCenterTags := merge $defaultAWSTags ($identityCenter.tags | default (dict)) }}
 
-{{ $identityStore := $spec.identityStore | default (dict) }}
-{{ $identityStoreId := $identityStore.id | default "" }}
+{{ $identityStoreId := $spec.identityStoreId }}
 
 {{ $groups := $spec.groups | default (list) }}
 {{ $groupResourceNames := dict }}

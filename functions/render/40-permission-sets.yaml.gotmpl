@@ -47,6 +47,9 @@ spec:
     tags:
       {{- toYaml $permissionSetTags | nindent 6 }}
     {{- end }}
+    {{- with $permissionSet.forProvider }}
+    {{ toYaml . | nindent 4 }}
+    {{- end }}
   providerConfigRef:
     kind: ProviderConfig
     name: {{ $providerConfigName }}

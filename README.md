@@ -37,7 +37,7 @@ AWS IAM Identity Center must be enabled manually in your AWS Organization's mana
    - Click **Enable** if this is your first time
    - Choose **Enable with AWS Organizations** (recommended)
    - Select your preferred region (e.g., `us-east-1`) - this will be where your Identity Center instance lives
-   - Click **Create AWS organization** if you don't already have one
+   - Click **Create AWS organization** if you don't already have one (usually, you'd do this first with hops-ops/configurations-aws-organization)
 
 4. **Note the Instance Details** (you'll need these for Crossplane):
    - After enabling, go to **Settings** in the IAM Identity Center console
@@ -126,11 +126,10 @@ spec:
   managementPolicies: ["*"]
   providerConfigName: aws-provider
   region: us-east-1  # Must match where you enabled Identity Center
+  identityStoreId: d-1234567890  # From Step 1
   identityCenter:
     instanceArn: arn:aws:sso:::instance/ssoins-1234567890abcdef  # From Step 1
     sessionDuration: PT2H
-  identityStore:
-    id: d-1234567890  # From Step 1
   groups:
     - name: Admins
       displayName: Platform Admins
@@ -210,12 +209,11 @@ spec:
   managementPolicies: ["*"]
   providerConfigName: aws-provider
   region: us-east-1
+  identityStoreId: d-1234567890
   identityCenter:
     instanceArn: arn:aws:sso:::instance/ssoins-1234567890abcdef
     sessionDuration: PT2H
     relayState: https://console.aws.amazon.com/
-  identityStore:
-    id: d-1234567890
   groups:
     - name: Admins
       displayName: Platform Admins

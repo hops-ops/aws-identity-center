@@ -18,23 +18,24 @@ _base64_creds = base64.encode(_creds)
 
 # Identity Center instance - AWS only allows one per organization
 # Get these values with: aws sso-admin list-instances
-_instance_arn = "arn:aws:sso:::instance/ssoins-CHANGEME"
-_identity_store_id = "d-CHANGEME"
+_instance_arn = "arn:aws:sso:::instance/ssoins-668444b406cda8b2"
+_identity_store_id = "d-9a675288a4"
+_region = "us-east-2"
 
 # Target account for testing permission set assignments
 _target_account = "123456789012"
 
 # Persistent group - imported via externalName, not deleted on cleanup
-_persistent_group_name = "E2EPersistentAdmins"
-_persistent_group_id = "CHANGEME-group-id"
+_persistent_group_name = "hops-e2e-test"
+# _persistent_group_id = "CHANGEME-group-id"
 
 # Persistent user - imported via externalName, not deleted on cleanup
-_persistent_user_name = "e2e-persistent-admin"
-_persistent_user_id = "CHANGEME-user-id"
+_persistent_user_name = "hops-e2e-admin"
+# _persistent_user_id = "CHANGEME-user-id"
 
 # Persistent permission set - imported via externalName, not deleted on cleanup
 _persistent_permission_set_name = "E2EPersistentAccess"
-_persistent_permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-CHANGEME/ps-CHANGEME"
+# _persistent_permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-CHANGEME/ps-CHANGEME"
 
 # =============================================================================
 # Dynamic test resources - timestamped to allow concurrent test runs
@@ -61,12 +62,11 @@ _items = [
                         managementMode: "self"
                         managementPolicies: ["*"]
                         providerConfigName: "default"
+                        region: _region
+                        identityStoreId: _identity_store_id
                         identityCenter: {
                             instanceArn: _instance_arn
                             sessionDuration: "PT2H"
-                        }
-                        identityStore: {
-                            id: _identity_store_id
                         }
                         groups: [
                             # Persistent group - imported and orphaned (won't be deleted)
@@ -89,7 +89,7 @@ _items = [
                                 email: "e2e-persistent-admin@ops.com.ai"
                                 firstName: "E2E"
                                 lastName: "Persistent"
-                                externalName: _persistent_user_id
+                                # externalName: _persistent_user_id
                                 managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
                                 groups: [_persistent_group_name]
                             }
@@ -107,7 +107,7 @@ _items = [
                             {
                                 name: _persistent_permission_set_name
                                 description: "Persistent permission set for e2e testing"
-                                externalName: _persistent_permission_set_arn
+                                # externalName: _persistent_permission_set_arn
                                 managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
                                 managedPolicies: [
                                     "arn:aws:iam::aws:policy/ReadOnlyAccess"

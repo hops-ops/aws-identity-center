@@ -24,6 +24,8 @@ spec:
             description: Desired Identity Center configuration.
             required:
             - managementPolicies
+            - identityStoreId
+            - region
             properties:
               organizationName:
                 type: string
@@ -38,10 +40,6 @@ spec:
                 - self
                 - managed
                 default: self
-              deletionPolicy:
-                type: string
-                description: Delete or Orphan composed resources when the XR is removed.
-                default: Delete
               managementPolicies:
                 type: array
                 description: Management operations allowed on composed resources. Use ["*"] for full management or omit Delete to orphan.
@@ -59,6 +57,9 @@ spec:
               providerConfigName:
                 type: string
                 description: ProviderConfig used for all AWS API calls. Defaults to metadata.name.
+              identityStoreId:
+                type: string
+                description: Identity Store ID (for example, d-1234567890).
               identityCenter:
                 type: object
                 description: Optional overrides for the Identity Center instance.
@@ -76,13 +77,6 @@ spec:
                     type: object
                     description: Extra tags merged onto permission sets.
                     x-kubernetes-preserve-unknown-fields: true
-              identityStore:
-                type: object
-                description: Identity Store configuration when rendering local users and groups.
-                properties:
-                  id:
-                    type: string
-                    description: Identity Store ID (for example, d-1234567890). If not provided, will be derived from the Identity Center instance.
               groups:
                 type: array
                 description: Optional list of Identity Store groups to create.
@@ -120,6 +114,10 @@ spec:
                     tags:
                       type: object
                       description: Extra labels mirrored onto the metadata.labels map.
+                      x-kubernetes-preserve-unknown-fields: true
+                    forProvider:
+                      type: object
+                      description: Override any forProvider field on the rendered Group resource. Keys here overwrite template defaults. See provider docs.
                       x-kubernetes-preserve-unknown-fields: true
               users:
                 type: array
@@ -168,6 +166,10 @@ spec:
                     tags:
                       type: object
                       description: Extra labels mirrored onto the metadata.labels map.
+                      x-kubernetes-preserve-unknown-fields: true
+                    forProvider:
+                      type: object
+                      description: Override any forProvider field on the rendered User resource. Keys here overwrite template defaults. See provider docs.
                       x-kubernetes-preserve-unknown-fields: true
               permissionSets:
                 type: array
@@ -229,6 +231,10 @@ spec:
                             description: Path containing the IAM policy. Defaults to /.
                     tags:
                       type: object
+                      x-kubernetes-preserve-unknown-fields: true
+                    forProvider:
+                      type: object
+                      description: Override any forProvider field on the rendered PermissionSet resource. Keys here overwrite template defaults. See provider docs.
                       x-kubernetes-preserve-unknown-fields: true
                     assignToAccounts:
                       type: array
