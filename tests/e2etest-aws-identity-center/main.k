@@ -27,15 +27,15 @@ _target_account = "544051101726"
 
 # Persistent group - imported via externalName, not deleted on cleanup
 _persistent_group_name = "hops-e2e-test"
-# _persistent_group_id = "CHANGEME-group-id"
+_persistent_group_id = "d1fb9590-0091-7072-55a4-dd0778f5d5cb"
 
 # Persistent user - imported via externalName, not deleted on cleanup
 _persistent_user_name = "hops-e2e-admin"
-# _persistent_user_id = "CHANGEME-user-id"
+_persistent_user_id = "217be550-1051-7016-a428-1864e5e57e75"
 
 # Persistent permission set - imported via externalName, not deleted on cleanup
 _persistent_permission_set_name = "E2EPersistentAccess"
-# _persistent_permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-CHANGEME/ps-CHANGEME"
+_persistent_permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-668444b406cda8b2/ps-aaebc62f1ea517cc"
 
 # =============================================================================
 # Dynamic test resources - timestamped to allow concurrent test runs
@@ -73,7 +73,7 @@ _items = [
                             {
                                 name: _persistent_group_name
                                 displayName: "E2E Persistent Admins"
-                                # externalName: _persistent_group_id
+                                externalName: _persistent_group_id
                                 managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
                             }
                             # Timestamped group - created and deleted each run
@@ -89,7 +89,7 @@ _items = [
                                 email: "hops-e2e-admin@ops.com.ai"
                                 firstName: "E2E"
                                 lastName: "Persistent"
-                                # externalName: _persistent_user_id
+                                externalName: _persistent_user_id
                                 managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
                                 groups: [_persistent_group_name]
                             }
@@ -107,7 +107,7 @@ _items = [
                             {
                                 name: _persistent_permission_set_name
                                 description: "Persistent permission set for e2e testing"
-                                # externalName: _persistent_permission_set_arn
+                                externalName: _persistent_permission_set_arn
                                 managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
                                 managedPolicies: [
                                     "arn:aws:iam::aws:policy/ReadOnlyAccess"

@@ -18,7 +18,7 @@ kind: Usage
 metadata:
   name: {{ printf "%s-inline-uses-permissionset" $permissionSetResourceName }}
   annotations:
-    gotemplating.fn.crossplane.io/composition-resource-name: "permission-set-inline-policy-usage"
+    {{ setResourceNameAnnotation (printf "permission-set-inline-policy-usage-%s" $permissionSetName) }}
 spec:
   replayDeletion: true
   of:
@@ -48,7 +48,7 @@ kind: Usage
 metadata:
   name: {{ printf "%s-managed-%d-uses-permissionset" $permissionSetResourceName $mpIndex }}
   annotations:
-    gotemplating.fn.crossplane.io/composition-resource-name: "permission-set-managed-policy-usage"
+    {{ setResourceNameAnnotation (printf "permission-set-managed-policy-usage-%s-%d" $permissionSetName $mpIndex) }}
 spec:
   replayDeletion: true
   of:
@@ -79,7 +79,7 @@ kind: Usage
 metadata:
   name: {{ printf "%s-customer-managed-%d-uses-permissionset" $permissionSetResourceName $cmpIndex }}
   annotations:
-    gotemplating.fn.crossplane.io/composition-resource-name: "permission-set-customer-managed-policy-usage"
+    {{ setResourceNameAnnotation (printf "permission-set-customer-managed-policy-usage-%s-%d" $permissionSetName $cmpIndex) }}
 spec:
   replayDeletion: true
   of:
@@ -109,7 +109,7 @@ kind: Usage
 metadata:
   name: {{ printf "%s-assignment-%d-uses-permissionset" $permissionSetResourceName $assignIndex }}
   annotations:
-    gotemplating.fn.crossplane.io/composition-resource-name: "permission-set-account-assignment-usage"
+    {{ setResourceNameAnnotation (printf "permission-set-account-assignment-usage-%s-%d" $permissionSetName $assignIndex) }}
 spec:
   replayDeletion: true
   of:
