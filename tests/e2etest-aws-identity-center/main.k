@@ -81,7 +81,7 @@ _items = [
                             # Timestamped group - created and deleted each run
                             {
                                 name: _test_group_name
-                                displayName: "E2E Timestamped Test Group"
+                                displayName: _test_group_name
                             }
                         ]
                         users: [

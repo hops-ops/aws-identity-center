@@ -58,7 +58,7 @@ spec:
       name: {{ $permissionSetResourceName }}
   by:
     apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
-    kind: PermissionSetManagedPolicyAttachment
+    kind: ManagedPolicyAttachment
     resourceRef:
       name: {{ printf "%s-managed-%d" $permissionSetResourceName $mpIndex }}
 
