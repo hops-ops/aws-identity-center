@@ -5,6 +5,7 @@ on:
     - main
     paths:
       - '.github/workflows/on-push-main.yaml'
+      - '.github/workflows/on-version-tagged.yaml'
       - '.gitops/**'
       - 'apis/**'
       - 'examples/**'
