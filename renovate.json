@@ -13,7 +13,7 @@
   "packageRules": [
     {
       "matchDatasources": ["docker"],
-      "matchPackageNames": ["/^hops-ops\\//"],
+      "matchPackageNames": ["/hops-ops/"],
       "enabled": false
     }
   ],
@@ -37,10 +37,13 @@
         "upbound.yaml"
       ],
       "matchStrings": [
-        "\\s*(configuration|function|package|provider):\\s*(?<registryUrl>.*)\\/(?<depName>.*)\\s*version:\\s*(\"|')>=(?<currentValue>.*?)(\"|')\\s*"
+        "\\s*(configuration|function|package|provider):\\s*(?<registryUrl>.*)\\/(?<orgName>.*)\\/(?<repoName>.*)\\s*version:\\s*(\"|')>=(?<currentValue>.*?)(\"|')\\s*"
       ],
       "datasourceTemplate": "docker",
-      "registryUrlTemplate": "https://{{registryUrl}}"
+      "registryUrlTemplate": "https://{{registryUrl}}",
+      "depNameTemplate": "{{orgName}}/{{repoName}}",
+      "lookupNameTemplate": "{{orgName}}/{{repoName}}",
+      "packageNameTemplate": "{{orgName}}/{{repoName}}"
     }
   ]
 }
