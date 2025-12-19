@@ -1,335 +1,328 @@
 # configuration-aws-identity-center
 
-`configuration-aws-identity-center` publishes the namespaced `IdentityCenter` composite. It provisions a full IAM Identity Center instance per organization, including optional starter local users, Identity Store groups, production-ready permission sets, and deterministic account assignments so teams get AWS Console access minutes after the root account exists.
+Manage AWS IAM Identity Center (SSO) as code. Define groups, users, permission sets, and account assignments in a single resource.
 
-## Features
+## Why Identity Center?
 
-- **Namespaced, Crossplane 2.0 ready** – `IdentityCenter` is scoped to namespaces, carries `managementPolicies`, and exposes a structured status so you can multi-tenant access provisioning with confidence.
-- **Root-account aware** – `spec.forProvider.rootAccountRef` keeps the Identity Center instance aligned with the root AWS account you already manage via the `Account` composite. Provider configs default to that account, so day-one bootstrap is copy/paste simple.
-- **Identity Store automation** – declare starter groups and local users (emails, names, default group memberships). The composition fans these out into Identity Store `Group`, `User`, and `GroupMembership` resources.
-- **Opinionated permission sets** – ship turnkey AWS managed policies plus optional inline or customer-managed attachments. Use `assignToGroups`, `assignToUsers`, and `assignToAccounts` to describe access at a high level; the composition renders the cross-product into AWS `AccountAssignment` resources. Explicit overrides are still available via `permissionSets[].assignments`.
-- **Observability + safety** – the render function projects Identity Store IDs, permission set ARNs, and assignment metadata back into status and only emits `Usage` objects once the upstream resources report Ready.
-- **CI + tests** – focused examples under `examples/identitycenters/` plus KCL regression tests (`tests/test-render`) keep behavioural drift out of main.
+**Without Identity Center:**
+- IAM users with long-lived access keys
+- Separate credentials per account
+- No central audit of who accessed what
+- Password management nightmare
+
+**With Identity Center:**
+- Single sign-on across all AWS accounts
+- Time-limited credentials (no access keys)
+- Federate with Google, Okta, Azure AD
+- Central audit trail in CloudTrail
+- One place to revoke access
 
 ## Prerequisites
 
-- Crossplane v1.15+ running in your control plane.
-- Crossplane packages:
-  - `provider-aws-identitystore` (≥ v2.2.0)
-  - `provider-aws-ssoadmin` (≥ v2.2.0)
-  - `function-auto-ready` (≥ v0.5.1)
+Identity Center must be enabled manually in AWS (one-time setup):
 
-Stick with the `crossplane-contrib` packages listed above—Upbound-hosted variants now require paid accounts and break our OSS workflow.
+1. Go to [IAM Identity Center console](https://console.aws.amazon.com/singlesignon)
+2. Click **Enable** and choose **Enable with AWS Organizations**
+3. Note the **Instance ARN** and **Identity Store ID** from Settings
 
-## Setup
+## The Journey
 
-### Step 1: Enable AWS IAM Identity Center (Manual)
+### Stage 1: Basic SSO Setup
 
-AWS IAM Identity Center must be enabled manually in your AWS Organization's management account. This is a one-time setup per organization.
+Start with a single admin group and permission set.
 
-1. **Sign in to the AWS Management Console** as a user with administrator permissions in your organization's management account.
-
-2. **Navigate to IAM Identity Center**:
-   - Go to the [IAM Identity Center console](https://console.aws.amazon.com/singlesignon)
-   - Or search for "IAM Identity Center" (formerly "AWS SSO") in the AWS Console search bar
-
-3. **Enable IAM Identity Center**:
-   - Click **Enable** if this is your first time
-   - Choose **Enable with AWS Organizations** (recommended)
-   - Select your preferred region (e.g., `us-east-1`) - this will be where your Identity Center instance lives
-   - Click **Create AWS organization** if you don't already have one (usually, you'd do this first with hops-ops/configurations-aws-organization)
-
-4. **Note the Instance Details** (you'll need these for Crossplane):
-   - After enabling, go to **Settings** in the IAM Identity Center console
-   - Copy the **Instance ARN** (format: `arn:aws:sso:::instance/ssoins-xxxxxxxxxx`)
-   - Copy the **Identity store ID** (format: `d-xxxxxxxxxx`)
-   - Note the **AWS Region** where Identity Center is enabled
-
-5. **Configure Identity Source** (optional):
-   - By default, Identity Center uses its built-in directory
-   - You can connect to Active Directory or an external identity provider later
-   - For this configuration, the built-in Identity Store works fine
-
-### Step 2: Set Up Crossplane AWS Providers
-
-Ensure your Crossplane AWS providers are configured with appropriate credentials:
-
-```yaml
-apiVersion: aws.upbound.io/v1beta1
-kind: ProviderConfig
-metadata:
-  name: aws-provider
-spec:
-  credentials:
-    source: Secret
-    secretRef:
-      namespace: crossplane-system
-      name: aws-creds
-      key: credentials
-```
-
-The credentials must have permissions for:
-- `identitystore:*`
-- `sso:*`
-- `sso-admin:*`
-
-**Example IAM Policy:**
-```json
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Effect": "Allow",
-      "Action": [
-        "sso:*",
-        "sso-admin:*",
-        "identitystore:*"
-      ],
-      "Resource": "*"
-    }
-  ]
-}
-```
-
-### Step 3: Install the Configuration
-
-```yaml
-apiVersion: pkg.crossplane.io/v1
-kind: Configuration
-metadata:
-  name: configuration-aws-identity-center
-spec:
-  package: ghcr.io/hops-ops/configuration-aws-identity-center:latest
-  skipDependencyResolution: true
-```
-
-Wait for the configuration and its dependencies to become healthy:
-
-```bash
-kubectl get configurations
-kubectl get providers
-```
-
-### Step 4: Create Your First IdentityCenter Resource
-
-Use the instance ARN, Identity Store ID, and region you collected in Step 1 to create an IdentityCenter resource:
-
-**Minimal example:**
+**Why groups over direct user assignments?**
+- Easier to manage as team grows
+- Add/remove users without touching permission sets
+- Audit who has access via group membership
 
 ```yaml
 apiVersion: aws.hops.ops.com.ai/v1alpha1
 kind: IdentityCenter
 metadata:
-  name: platform-sso
+  name: my-sso
   namespace: default
 spec:
   managementPolicies: ["*"]
-  providerConfigName: aws-provider
+  providerConfigName: default
   region: us-east-1  # Must match where you enabled Identity Center
-  identityStoreId: d-1234567890  # From Step 1
+
+  # From AWS console: IAM Identity Center > Settings
+  identityStoreId: d-1234567890
   identityCenter:
-    instanceArn: arn:aws:sso:::instance/ssoins-1234567890abcdef  # From Step 1
-    sessionDuration: PT2H
+    instanceArn: arn:aws:sso:::instance/ssoins-abcdef0123456789
+    sessionDuration: PT4H  # 4-hour sessions
+
   groups:
-    - name: Admins
-      displayName: Platform Admins
-  users:
-    - username: admin
-      email: admin@example.com
-      firstName: Admin
-      lastName: User
-      groups: [Admins]
+    - name: Administrators
+      description: Full administrative access
+
   permissionSets:
-    - name: AdminAccess
-      description: Full administrator access
+    - name: AdministratorAccess
+      description: Full admin access
       managedPolicies:
         - arn:aws:iam::aws:policy/AdministratorAccess
-      assignToGroups: [Admins]
-      assignToAccounts: ["123456789012"]  # Your AWS account ID
+      assignToGroups: [Administrators]
+      assignToAccounts: ["123456789012"]  # Your account ID
 ```
 
-When adopting an existing permission set, set `permissionSets[].externalName` to `PERMISSION_SET_ARN,INSTANCE_ARN` (both values required by the provider).
+### Stage 2: Add Users
 
-To adopt existing group memberships (avoid conflicts when a user is already in a group), set `users[].groupMembershipExternalNames[<groupName>]` to the Identity Store membership ID. Fetch it with `aws identitystore list-group-memberships --identity-store-id <id> --group-id <groupId>` and use the returned `MembershipId` value.
+Create local users in Identity Store. They'll receive email invitations to set up passwords.
 
-Import tips for existing Identity Store group memberships (Terraform/Pulumi):
-- MembershipId is not shown in the AWS console; fetch it via `aws identitystore list-group-memberships --identity-store-id <id> --group-id <group-id>`.
-- Grab `identity_store_id` from `aws sso-admin list-instances` and group/user IDs from `aws identitystore list-groups` / `list-users`.
+**Why local users?**
+- Quick to get started
+- No external IdP setup required
+- Can migrate to federated later
 
-Apply it:
+```yaml
+users:
+  - username: admin
+    email: admin@acme.example.com
+    firstName: Admin
+    lastName: User
+    groups: [Administrators]
 
-```bash
-kubectl apply -f platform-sso.yaml
+  - username: alice
+    email: alice@acme.example.com
+    firstName: Alice
+    lastName: Engineer
+    groups: [Developers]
 ```
 
-Watch the resources reconcile:
+### Stage 3: Role-Based Access
 
-```bash
-# Watch the main composite
-kubectl get identitycenters -n default
+Different teams need different access levels. Create groups and permission sets for each role.
 
-# Check individual managed resources
-kubectl get users,groups,groupmemberships -n default
-kubectl get permissionsets,accountassignments -n default
-```
-
-### Step 5: Access the AWS Console
-
-Once the IdentityCenter resource is Ready:
-
-1. **Get the AWS Access Portal URL**:
-   - In the IAM Identity Center console, go to **Settings**
-   - Copy the **AWS access portal URL** (format: `https://d-xxxxxxxxxx.awsapps.com/start`)
-
-2. **Set up your user's password**:
-   - In the IAM Identity Center console, go to **Users**
-   - Find your user (e.g., `admin`)
-   - Click **Reset password** and choose **Send email** or **Generate one-time password**
-   - If you chose email, check the user's email for the temporary password
-
-3. **Sign in**:
-   - Go to the AWS access portal URL
-   - Sign in with the username and password
-   - You'll be prompted to set a new password on first login
-
-4. **Configure MFA** (recommended):
-   - After signing in, you'll be prompted to register an MFA device
-   - Use an authenticator app like Google Authenticator or Authy
-
-5. **Access AWS Accounts**:
-   - After authentication, you'll see tiles for each AWS account you have access to
-   - Click on an account to see available permission sets
-   - Click **Management console** to open the AWS Console with that permission set
-
-## Usage Examples
-
-**Complete example with all options:**
+**Recommended structure:**
+- **Administrators** - Full access, short sessions
+- **Developers** - PowerUser without IAM, longer sessions
+- **ReadOnly** - View-only for auditors and support
+- **SecurityAudit** - Security team cross-account access
 
 ```yaml
 apiVersion: aws.hops.ops.com.ai/v1alpha1
 kind: IdentityCenter
 metadata:
-  name: platform-sso
+  name: acme-sso
   namespace: default
 spec:
-  organizationName: platform
-  managementMode: self
   managementPolicies: ["*"]
-  providerConfigName: aws-provider
+  providerConfigName: default
   region: us-east-1
   identityStoreId: d-1234567890
   identityCenter:
-    instanceArn: arn:aws:sso:::instance/ssoins-1234567890abcdef
-    sessionDuration: PT2H
-    relayState: https://console.aws.amazon.com/
+    instanceArn: arn:aws:sso:::instance/ssoins-abcdef0123456789
+
   groups:
-    - name: Admins
-      displayName: Platform Admins
-      description: Full administrator access
+    - name: Administrators
+      description: Platform team - full access
     - name: Developers
-      displayName: Platform Developers
-      description: Developer access with guardrails
+      description: Engineering - deploy and debug
+    - name: ReadOnly
+      description: Support and auditors
+    - name: SecurityTeam
+      description: Security engineers
+
   users:
-    - username: admin
-      email: admin@example.com
-      firstName: Admin
-      lastName: User
-      groups: [Admins]
-    - username: dev-1
-      email: dev1@example.com
-      firstName: Dev
-      lastName: One
+    - username: platform-admin
+      email: platform@acme.example.com
+      firstName: Platform
+      lastName: Admin
+      groups: [Administrators]
+
+    - username: alice
+      email: alice@acme.example.com
+      firstName: Alice
+      lastName: Engineer
       groups: [Developers]
+
+    - username: bob
+      email: bob@acme.example.com
+      firstName: Bob
+      lastName: Support
+      groups: [ReadOnly]
+
   permissionSets:
-    - name: HopsAdministratorAccess
-      description: Full admin – use sparingly
-      sessionDuration: PT2H
+    - name: AdministratorAccess
+      description: Full admin - use sparingly
+      sessionDuration: PT2H  # Short sessions for safety
       managedPolicies:
         - arn:aws:iam::aws:policy/AdministratorAccess
-      assignToGroups: [Admins]
-      assignToAccounts: ["123456789012"]
-    - name: HopsDeveloperAccess
-      description: Safe developer defaults
-      sessionDuration: PT8H
+      assignToGroups: [Administrators]
+      assignToAccounts: ["111111111111", "222222222222"]
+
+    - name: DeveloperAccess
+      description: Deploy and debug without IAM
+      sessionDuration: PT8H  # Longer for productivity
       managedPolicies:
-        - arn:aws:iam::aws:policy/AmazonEKSClusterPolicy
-        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
-      inlinePolicy: |
-        {
-          "Version": "2012-10-17",
-          "Statement": [
-            {"Effect": "Deny", "Action": ["iam:*", "aws-portal:*"], "Resource": "*"}
-          ]
-        }
+        - arn:aws:iam::aws:policy/PowerUserAccess
       assignToGroups: [Developers]
-      assignToAccounts: ["210987654321"]
+      assignToAccounts: ["222222222222"]  # Dev account only
+
+    - name: ViewOnlyAccess
+      description: Read-only for support
+      sessionDuration: PT1H
+      managedPolicies:
+        - arn:aws:iam::aws:policy/ViewOnlyAccess
+      assignToGroups: [ReadOnly]
+      assignToAccounts: ["111111111111", "222222222222"]
+
+    - name: SecurityAudit
+      description: Security team audit access
+      managedPolicies:
+        - arn:aws:iam::aws:policy/SecurityAudit
+      assignToGroups: [SecurityTeam]
+      assignToAccounts: ["111111111111", "222222222222"]
 ```
 
-This renders the Identity Store users/groups (plus GroupMemberships), then the permission sets, inline or managed policy attachments, optional customer managed policy attachments, and the account assignments derived from `assignTo*`. Logical names are slugified automatically so you can keep AWS-friendly display names.
+### Stage 4: Custom Policies
 
-## Troubleshooting
+Need more granular control? Use inline policies or customer-managed policies.
 
-### Resources Not Becoming Ready
+**When to use each:**
+- **Managed policies** - AWS-provided, broad permissions
+- **Inline policies** - Custom restrictions, deny statements
+- **Customer-managed** - Reusable custom policies in IAM
 
-Check the status of managed resources:
-
-```bash
-# Check all managed resources
-kubectl get managed -n default
-
-# Describe a specific resource to see events
-kubectl describe user.identitystore.aws.m.upbound.io/<user-name> -n default
-kubectl describe permissionset.ssoadmin.aws.m.upbound.io/<ps-name> -n default
+```yaml
+permissionSets:
+  - name: RestrictedDeveloper
+    description: Developer with guardrails
+    sessionDuration: PT8H
+    managedPolicies:
+      - arn:aws:iam::aws:policy/PowerUserAccess
+    # Add restrictions via inline policy
+    inlinePolicy: |
+      {
+        "Version": "2012-10-17",
+        "Statement": [
+          {
+            "Effect": "Deny",
+            "Action": [
+              "iam:*",
+              "organizations:*",
+              "aws-portal:*"
+            ],
+            "Resource": "*"
+          },
+          {
+            "Effect": "Deny",
+            "Action": "ec2:*",
+            "Resource": "*",
+            "Condition": {
+              "StringNotEquals": {
+                "ec2:Region": ["us-east-1", "us-west-2"]
+              }
+            }
+          }
+        ]
+      }
+    assignToGroups: [Developers]
+    assignToAccounts: ["222222222222"]
 ```
 
-Common issues:
+### Stage 5: Import Existing Resources
 
-1. **Wrong instance ARN or Identity Store ID**: Verify the values from the IAM Identity Center console Settings page
-2. **Wrong region**: The `spec.region` must match where you enabled Identity Center
-3. **Insufficient permissions**: Check your ProviderConfig credentials have the required IAM permissions
-4. **Provider not ready**: Ensure `provider-aws-identitystore` and `provider-aws-ssoadmin` are healthy
+Already have Identity Center configured? Import existing groups, users, and permission sets.
 
-### User Can't Sign In
+**Why import?**
+- Preserve existing configurations
+- No disruption to current access
+- Gradually bring under Crossplane management
 
-1. **Password not set**: In the IAM Identity Center console, go to Users → select user → Reset password
-2. **Wrong access portal URL**: Get the correct URL from Settings in the IAM Identity Center console
-3. **User not in group**: Verify `spec.users[].groups` includes the expected group names
-4. **Account assignment not ready**: Check `kubectl get accountassignments -n default`
+```yaml
+apiVersion: aws.hops.ops.com.ai/v1alpha1
+kind: IdentityCenter
+metadata:
+  name: existing-sso
+  namespace: default
+spec:
+  managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
+  providerConfigName: default
+  region: us-east-1
+  identityStoreId: d-1234567890
+  identityCenter:
+    instanceArn: arn:aws:sso:::instance/ssoins-abcdef0123456789
 
-### Permission Set Not Appearing
+  groups:
+    - name: Administrators
+      # Import existing group by ID
+      externalName: d1fb9590-0091-7072-55a4-dd0778f5d5cb
+      managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
 
-1. **Assignment not created**: Ensure you've specified either `assignToGroups`, `assignToUsers`, or explicit `assignments`
-2. **Account ID mismatch**: Verify the account ID in `assignToAccounts` matches your target AWS account
-3. **User assignments require observed state**: User assignments need the User resource to be Ready first (uses observed principal ID)
+  users:
+    - username: admin
+      email: admin@acme.example.com
+      firstName: Admin
+      lastName: User
+      # Import existing user
+      externalName: 217be550-1051-7016-a428-1864e5e57e75
+      managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
+      groups: [Administrators]
+      # Import existing group membership
+      groupMembershipExternalNames:
+        Administrators: 115b85b0-f0c1-70ae-802f-41695fa2f655
 
-### Checking Status
-
-View the composite status for an overview:
-
-```bash
-kubectl get identitycenter platform-sso -n default -o yaml | yq '.status'
+  permissionSets:
+    - name: AdministratorAccess
+      # Format: PERMISSION_SET_ARN,INSTANCE_ARN
+      externalName: arn:aws:sso:::permissionSet/ssoins-abcdef/ps-12345678,arn:aws:sso:::instance/ssoins-abcdef
+      managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
+      managedPolicies:
+        - arn:aws:iam::aws:policy/AdministratorAccess
 ```
 
-The status shows:
-- `identityCenter.instanceArn` - confirmed instance ARN
-- `identityStore.id` - confirmed Identity Store ID
-- `identityStore.users[]` - each user with their resolved ID
-- `identityStore.groups[]` - each group with their resolved ID
-- `permissionSets[]` - each permission set with ARN and account assignments
+## Accessing AWS
+
+After Identity Center is ready:
+
+1. Get the AWS Access Portal URL from IAM Identity Center > Settings
+2. Users receive email invitations to set passwords
+3. Sign in at the portal URL
+4. Select an account and permission set
+5. Click "Management console" or get CLI credentials
+
+## Status
+
+IdentityCenter exposes IDs for debugging and downstream use:
+
+```yaml
+status:
+  identityCenter:
+    instanceArn: arn:aws:sso:::instance/ssoins-abcdef
+    ready: true
+  identityStore:
+    id: d-1234567890
+    groups:
+      - name: Administrators
+        id: d1fb9590-0091-7072-55a4-dd0778f5d5cb
+    users:
+      - name: admin
+        id: 217be550-1051-7016-a428-1864e5e57e75
+  permissionSets:
+    - name: AdministratorAccess
+      arn: arn:aws:sso:::permissionSet/ssoins-abcdef/ps-12345678
+```
+
+## Recommendations
+
+1. **Use groups, not direct user assignments** - Easier to manage at scale
+2. **Short sessions for admin access** - PT2H or less for AdministratorAccess
+3. **Longer sessions for daily work** - PT8H for developers improves productivity
+4. **Deny dangerous actions via inline policy** - Add guardrails to PowerUserAccess
+5. **Don't delete users from Identity Store** - Orphan them with managementPolicies instead
+6. **Federate when ready** - Start with local users, migrate to IdP later
 
 ## Development
 
-- `make clean` – remove `_output/` and `.up/` artefacts.
-- `make build` – rebuild the configuration package via `up project build`.
-- `make render` / `make render-all` – render examples with `up composition render`.
-- `make validate` – validate the XRD + examples with `crossplane beta validate`.
-- `make test` – run `up test run tests/test-*`.
-- `make publish tag=<version>` – build and push configuration + render function images.
-- `make e2e` – execute the AWS-backed suite under `tests/e2etest-identity-center` (requires valid `aws-creds` and instance metadata).
+```bash
+make render              # Render default example
+make test                # Run tests
+make validate            # Validate compositions
+make e2e                 # E2E tests
+```
 
-Update the schema, examples, tests, README, and `AGENTS.md` together whenever you add new inputs.
+## License
 
-## Support
-
-- **Issues**: [github.com/hops-ops/configuration-aws-identity-center/issues](https://github.com/hops-ops/configuration-aws-identity-center/issues)
-- **Discussions**: [github.com/hops-ops/configuration-aws-identity-center/discussions](https://github.com/hops-ops/configuration-aws-identity-center/discussions)
+Apache-2.0

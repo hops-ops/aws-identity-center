@@ -10,12 +10,13 @@
     {{- $inlinePolicy := $permissionSet.inlinePolicy }}
     {{- $awsManagedPolicies := $permissionSet.managedPolicies | default (list) }}
     {{- $customerManagedPolicies := $permissionSet.customerManagedPolicies | default (list) }}
-    {{- $permissionSetResourceName := index $permissionSetResourceNames $permissionSetName | default (printf "%s-%s-permissionset" $organizationName (regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-")) }}
+    {{- $permissionSetResourceName := index $permissionSetResourceNames $permissionSetName | default (printf "%s-%s" $organizationName (regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-")) }}
     {{- $permissionSetLabelValue := regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-" }}
     {{- $permissionSetLabels := dict "hops.ops.com.ai/organization" $organizationName "aws.hops.ops.com.ai/identity-center-permission-set" $permissionSetLabelValue }}
     {{- $permissionSetTags := merge $identityCenterTags ($permissionSet.tags | default (dict)) }}
     {{- $psMgmtPolicies := index $permissionSetManagementPolicies $permissionSetName | default $managementPolicies }}
     {{- $psExtName := index $permissionSetExternalNames $permissionSetName | default "" }}
+    {{- $permissionSetReady := get $permissionSetReadyMap $permissionSetName | default false }}
 
 ---
 
@@ -81,6 +82,32 @@ spec:
     kind: ProviderConfig
     name: {{ $providerConfigName }}
 
+# Usage: PermissionSet protected by InlinePolicy
+      {{- $inlineReady := get $inlinePolicyReadyMap $permissionSetName | default false }}
+      {{- if and $permissionSetReady $inlineReady }}
+
+---
+
+apiVersion: protection.crossplane.io/v1beta1
+kind: Usage
+metadata:
+  name: {{ printf "of-%s-by-%s-inline" $permissionSetResourceName $permissionSetResourceName }}
+  annotations:
+    {{ setResourceNameAnnotation (printf "permission-set-inline-policy-usage-%s" $permissionSetName) }}
+spec:
+  replayDeletion: true
+  of:
+    apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+    kind: PermissionSet
+    resourceRef:
+      name: {{ $permissionSetResourceName }}
+  by:
+    apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+    kind: PermissionSetInlinePolicy
+    resourceRef:
+      name: {{ printf "%s-inline" $permissionSetResourceName }}
+
+      {{- end }}
     {{- end }}
 
     {{- range $mpIndex, $awsManagedPolicy := $awsManagedPolicies }}
@@ -110,6 +137,32 @@ spec:
     kind: ProviderConfig
     name: {{ $providerConfigName }}
 
+# Usage: PermissionSet protected by ManagedPolicyAttachment
+        {{- $managedReady := get $managedPolicyReadyMap (printf "%s-%d" $permissionSetName $mpIndex) | default false }}
+        {{- if and $permissionSetReady $managedReady }}
+
+---
+
+apiVersion: protection.crossplane.io/v1beta1
+kind: Usage
+metadata:
+  name: {{ printf "of-%s-by-%s-managed-%d" $permissionSetResourceName $permissionSetResourceName $mpIndex }}
+  annotations:
+    {{ setResourceNameAnnotation (printf "permission-set-managed-policy-usage-%s-%d" $permissionSetName $mpIndex) }}
+spec:
+  replayDeletion: true
+  of:
+    apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+    kind: PermissionSet
+    resourceRef:
+      name: {{ $permissionSetResourceName }}
+  by:
+    apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+    kind: ManagedPolicyAttachment
+    resourceRef:
+      name: {{ printf "%s-managed-%d" $permissionSetResourceName $mpIndex }}
+
+        {{- end }}
       {{- end }}
     {{- end }}
 
@@ -144,6 +197,32 @@ spec:
     kind: ProviderConfig
     name: {{ $providerConfigName }}
 
+# Usage: PermissionSet protected by CustomerManagedPolicyAttachment
+        {{- $customerReady := get $customerManagedReadyMap (printf "%s-%d" $permissionSetName $cmpIndex) | default false }}
+        {{- if and $permissionSetReady $customerReady }}
+
+---
+
+apiVersion: protection.crossplane.io/v1beta1
+kind: Usage
+metadata:
+  name: {{ printf "of-%s-by-%s-customer-managed-%d" $permissionSetResourceName $permissionSetResourceName $cmpIndex }}
+  annotations:
+    {{ setResourceNameAnnotation (printf "permission-set-customer-managed-policy-usage-%s-%d" $permissionSetName $cmpIndex) }}
+spec:
+  replayDeletion: true
+  of:
+    apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+    kind: PermissionSet
+    resourceRef:
+      name: {{ $permissionSetResourceName }}
+  by:
+    apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+    kind: CustomerManagedPolicyAttachment
+    resourceRef:
+      name: {{ printf "%s-customer-managed-%d" $permissionSetResourceName $cmpIndex }}
+
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}

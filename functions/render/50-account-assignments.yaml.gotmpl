@@ -4,11 +4,12 @@
 {{ range $permissionSet := $permissionSets }}
   {{- $permissionSetName := $permissionSet.name }}
   {{- if and $permissionSetName $identityCenterInstanceArn }}
-    {{- $permissionSetResourceName := index $permissionSetResourceNames $permissionSetName | default (printf "%s-%s-permissionset" $organizationName (regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-")) }}
+    {{- $permissionSetResourceName := index $permissionSetResourceNames $permissionSetName | default (printf "%s-%s" $organizationName (regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-")) }}
     {{- $permissionSetLabelValue := regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-" }}
     {{- $permissionSetLabels := dict "hops.ops.com.ai/organization" $organizationName "aws.hops.ops.com.ai/identity-center-permission-set" $permissionSetLabelValue }}
     {{- $psMgmtPolicies := index $permissionSetManagementPolicies $permissionSetName | default $managementPolicies }}
     {{- $assignments := get $permissionSetAssignments $permissionSetName | default (list) }}
+    {{- $permissionSetReady := get $permissionSetReadyMap $permissionSetName | default false }}
 
     {{- range $assignIndex, $assignment := $assignments }}
       {{- $accountId := $assignment.accountId }}
@@ -55,6 +56,32 @@ spec:
     kind: ProviderConfig
     name: {{ $providerConfigName }}
 
+# Usage: PermissionSet protected by AccountAssignment
+        {{- $assignmentReady := get $accountAssignmentReadyMap (printf "%s-%d" $permissionSetName $assignIndex) | default false }}
+        {{- if and $permissionSetReady $assignmentReady }}
+
+---
+
+apiVersion: protection.crossplane.io/v1beta1
+kind: Usage
+metadata:
+  name: {{ printf "of-%s-by-%s-assignment-%d" $permissionSetResourceName $permissionSetResourceName $assignIndex }}
+  annotations:
+    {{ setResourceNameAnnotation (printf "permission-set-account-assignment-usage-%s-%d" $permissionSetName $assignIndex) }}
+spec:
+  replayDeletion: true
+  of:
+    apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+    kind: PermissionSet
+    resourceRef:
+      name: {{ $permissionSetResourceName }}
+  by:
+    apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+    kind: AccountAssignment
+    resourceRef:
+      name: {{ printf "%s-assignment-%d" $permissionSetResourceName $assignIndex }}
+
+        {{- end }}
       {{- end }}
     {{- end }}
   {{- end }}

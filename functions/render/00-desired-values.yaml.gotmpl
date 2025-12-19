@@ -61,7 +61,7 @@
   {{- $permissionSetName := .name }}
   {{- if $permissionSetName }}
     {{- $permissionSetSlug := regexReplaceAll "[^a-z0-9-]" (lower $permissionSetName) "-" }}
-    {{- $_ := set $permissionSetResourceNames $permissionSetName (printf "%s-%s-permissionset" $organizationName $permissionSetSlug) }}
+    {{- $_ := set $permissionSetResourceNames $permissionSetName (printf "%s-%s" $organizationName $permissionSetSlug) }}
     {{- $_ := set $permissionSetManagementPolicies $permissionSetName (.managementPolicies | default $managementPolicies) }}
     {{- if .externalName }}
       {{- $_ := set $permissionSetExternalNames $permissionSetName .externalName }}
