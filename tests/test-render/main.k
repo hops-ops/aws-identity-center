@@ -78,7 +78,7 @@ _items = [
                     apiVersion: "ssoadmin.aws.m.upbound.io/v1beta1"
                     kind: "PermissionSet"
                     metadata: {
-                        name: "platform-sso-adminaccess-permissionset"
+                        name: "platform-sso-adminaccess"
                         labels: {
                             'aws.hops.ops.com.ai/identity-center-permission-set': "adminaccess"
                         }
@@ -99,13 +99,13 @@ _items = [
                     apiVersion: "ssoadmin.aws.m.upbound.io/v1beta1"
                     kind: "ManagedPolicyAttachment"
                     metadata: {
-                        name: "platform-sso-adminaccess-permissionset-managed-0"
+                        name: "platform-sso-adminaccess-managed-0"
                     }
                     spec: {
                         forProvider: {
                             managedPolicyArn: "arn:aws:iam::aws:policy/AdministratorAccess"
                             permissionSetArnRef: {
-                                name: "platform-sso-adminaccess-permissionset"
+                                name: "platform-sso-adminaccess"
                             }
                         }
                     }
@@ -114,12 +114,12 @@ _items = [
                     apiVersion: "ssoadmin.aws.m.upbound.io/v1beta1"
                     kind: "AccountAssignment"
                     metadata: {
-                        name: "platform-sso-adminaccess-permissionset-assignment-0"
+                        name: "platform-sso-adminaccess-assignment-0"
                     }
                     spec: {
                         forProvider: {
                             permissionSetArnRef: {
-                                name: "platform-sso-adminaccess-permissionset"
+                                name: "platform-sso-adminaccess"
                             }
                             targetId: "123456789012"
                             principalType: "GROUP"
@@ -158,7 +158,7 @@ _items = [
                     apiVersion: "ssoadmin.aws.m.upbound.io/v1beta1"
                     kind: "PermissionSetInlinePolicy"
                     metadata: {
-                        name: "workloads-workloads-readonly-permissionset-inline"
+                        name: "workloads-workloads-readonly-inline"
                     }
                     spec: {
                         forProvider: {
@@ -170,7 +170,7 @@ _items = [
                     apiVersion: "ssoadmin.aws.m.upbound.io/v1beta1"
                     kind: "CustomerManagedPolicyAttachment"
                     metadata: {
-                        name: "workloads-workloads-readonly-permissionset-customer-managed-0"
+                        name: "workloads-workloads-readonly-customer-managed-0"
                     }
                     spec: {
                         forProvider: {
@@ -185,7 +185,7 @@ _items = [
                     apiVersion: "ssoadmin.aws.m.upbound.io/v1beta1"
                     kind: "AccountAssignment"
                     metadata: {
-                        name: "workloads-workloads-readonly-permissionset-assignment-1"
+                        name: "workloads-workloads-readonly-assignment-1"
                     }
                     spec: {
                         forProvider: {
