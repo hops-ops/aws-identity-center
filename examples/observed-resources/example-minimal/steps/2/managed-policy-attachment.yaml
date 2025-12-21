@@ -1,0 +1,16 @@
+# Step 2: ManagedPolicyAttachment Ready
+apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+kind: ManagedPolicyAttachment
+metadata:
+  name: platform-sso-adminaccess-managed-administratoraccess
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: permission-set-managed-policy-AdminAccess-administratoraccess
+    crossplane.io/composition-resource-name: permission-set-managed-policy-AdminAccess-administratoraccess
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    id: "arn:aws:iam::aws:policy/AdministratorAccess,arn:aws:sso:::permissionSet/ssoins-1234567890abcdef/ps-adminaccess123,arn:aws:sso:::instance/ssoins-1234567890abcdef"

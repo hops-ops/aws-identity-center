@@ -1,0 +1,17 @@
+# Step 1: Group becomes Ready
+apiVersion: identitystore.aws.m.upbound.io/v1beta1
+kind: Group
+metadata:
+  name: workloads-ic-group-workloadsengineering
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: identity-center-group-WorkloadsEngineering
+    crossplane.io/composition-resource-name: identity-center-group-WorkloadsEngineering
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    groupId: "94815e08-0011-7072-55a4-workloads01"
+    id: "94815e08-0011-7072-55a4-workloads01"

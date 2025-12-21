@@ -10,6 +10,7 @@ status:
     ready: {{ if $identityCenterInstanceArn }}true{{ else }}false{{ end }}
   identityStore:
     id: {{ $identityStoreId }}
+{{- if $users }}
     users:
 {{- range $user := $users }}
       {{- $userName := $user.username }}
@@ -18,6 +19,8 @@ status:
       - name: {{ $userName }}
         id: {{ $userId }}
 {{- end }}
+{{- end }}
+{{- if $groups }}
     groups:
 {{- range $group := $groups }}
       {{- $groupName := $group.name }}
@@ -26,6 +29,8 @@ status:
       - name: {{ $groupName }}
         id: {{ $groupId }}
 {{- end }}
+{{- end }}
+{{- if $permissionSets }}
   permissionSets:
 {{- range $permissionSet := $permissionSets }}
     {{- $setName := $permissionSet.name }}
@@ -33,6 +38,7 @@ status:
     {{- $assignments := get $permissionSetAssignments $setName | default (list) }}
     - name: {{ $setName }}
       arn: {{ $observedSet.arn | default "" }}
+{{- if $assignments }}
       assignments:
       {{- range $assignment := $assignments }}
         {{- $principalType := upper ($assignment.principalType | default "USER") }}
@@ -48,4 +54,6 @@ status:
         principalId: {{ $principalId }}
         principalName: {{ $principalName | default "" }}
       {{- end }}
+{{- end }}
+{{- end }}
 {{- end }}

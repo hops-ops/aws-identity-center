@@ -1,0 +1,16 @@
+# Step 2: CustomerManagedPolicyAttachment Ready
+apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+kind: CustomerManagedPolicyAttachment
+metadata:
+  name: workloads-workloads-readonly-customer-customaudit
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: permission-set-customer-managed-policy-workloads-readonly-customaudit
+    crossplane.io/composition-resource-name: permission-set-customer-managed-policy-workloads-readonly-customaudit
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    id: "CustomAudit,/auditors/,arn:aws:sso:::permissionSet/ssoins-abcdef0123456789/ps-readonly123,arn:aws:sso:::instance/ssoins-abcdef0123456789"

@@ -1,0 +1,17 @@
+# Step 2: Group Ready
+apiVersion: identitystore.aws.m.upbound.io/v1beta1
+kind: Group
+metadata:
+  name: platform-sso-ic-group-admins
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: identity-center-group-Admins
+    crossplane.io/composition-resource-name: identity-center-group-Admins
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    groupId: "94815e08-0011-7072-55a4-example1234"
+    id: "94815e08-0011-7072-55a4-example1234"

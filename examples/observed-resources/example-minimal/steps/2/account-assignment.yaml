@@ -1,0 +1,16 @@
+# Step 2: AccountAssignment Ready
+apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+kind: AccountAssignment
+metadata:
+  name: platform-sso-adminaccess-assign-123456789012-group-admins
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: permission-set-assignment-AdminAccess-123456789012-group-admins
+    crossplane.io/composition-resource-name: permission-set-assignment-AdminAccess-123456789012-group-admins
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    id: "94815e08-0011-7072-55a4-example1234,GROUP,arn:aws:sso:::permissionSet/ssoins-1234567890abcdef/ps-adminaccess123,123456789012,arn:aws:sso:::instance/ssoins-1234567890abcdef"

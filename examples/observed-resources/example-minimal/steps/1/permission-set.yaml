@@ -1,0 +1,16 @@
+# Step 1: PermissionSet becomes Ready
+apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+kind: PermissionSet
+metadata:
+  name: platform-sso-adminaccess
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: permission-set-AdminAccess
+    crossplane.io/composition-resource-name: permission-set-AdminAccess
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    arn: "arn:aws:sso:::permissionSet/ssoins-1234567890abcdef/ps-adminaccess123"

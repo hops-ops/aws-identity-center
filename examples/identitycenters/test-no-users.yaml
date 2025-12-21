@@ -1,0 +1,19 @@
+apiVersion: aws.hops.ops.com.ai/v1alpha1
+kind: IdentityCenter
+metadata:
+  name: test-no-users
+spec:
+  managementPolicies: ["*"]
+  identityStoreId: d-123456
+  region: us-east-1
+  identityCenter:
+    instanceArn: arn:aws:sso:::instance/ssoins-123
+  groups:
+    - name: TestGroup
+      displayName: Test Group
+  permissionSets:
+    - name: ViewerAccess
+      managedPolicies:
+        - arn:aws:iam::aws:policy/ReadOnlyAccess
+      assignToGroups: [TestGroup]
+      assignToAccounts: ["123456789012"]

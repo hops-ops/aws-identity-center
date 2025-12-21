@@ -1,0 +1,16 @@
+# Step 2: AccountAssignment for user Ready
+apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+kind: AccountAssignment
+metadata:
+  name: workloads-workloads-readonly-assign-999999999999-user-workloads-reader
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: permission-set-assignment-workloads-readonly-999999999999-user-workloads-reader
+    crossplane.io/composition-resource-name: permission-set-assignment-workloads-readonly-999999999999-user-workloads-reader
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    id: "84815e08-0091-7032-44b5-workloads02,USER,arn:aws:sso:::permissionSet/ssoins-abcdef0123456789/ps-readonly123,999999999999,arn:aws:sso:::instance/ssoins-abcdef0123456789"

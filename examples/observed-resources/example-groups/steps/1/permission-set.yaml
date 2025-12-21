@@ -1,0 +1,16 @@
+# Step 1: PermissionSet becomes Ready
+apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+kind: PermissionSet
+metadata:
+  name: workloads-workloads-readonly
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: permission-set-workloads-readonly
+    crossplane.io/composition-resource-name: permission-set-workloads-readonly
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    arn: "arn:aws:sso:::permissionSet/ssoins-abcdef0123456789/ps-readonly123"

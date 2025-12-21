@@ -1,0 +1,12 @@
+# Step 2: Usage for ManagedPolicyAttachment Ready
+apiVersion: protection.crossplane.io/v1beta1
+kind: Usage
+metadata:
+  name: of-platform-sso-adminaccess-by-platform-sso-adminaccess-managed-administratoraccess
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: permission-set-managed-policy-AdminAccess-administratoraccess-usage
+    crossplane.io/composition-resource-name: permission-set-managed-policy-AdminAccess-administratoraccess-usage
+status:
+  conditions:
+    - type: Ready
+      status: "True"

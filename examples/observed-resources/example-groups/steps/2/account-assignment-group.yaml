@@ -1,0 +1,16 @@
+# Step 2: AccountAssignment for group Ready
+apiVersion: ssoadmin.aws.m.upbound.io/v1beta1
+kind: AccountAssignment
+metadata:
+  name: workloads-workloads-readonly-assign-210987654321-group-workloadsengineering
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: permission-set-assignment-workloads-readonly-210987654321-group-workloadsengineering
+    crossplane.io/composition-resource-name: permission-set-assignment-workloads-readonly-210987654321-group-workloadsengineering
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    id: "94815e08-0011-7072-55a4-workloads01,GROUP,arn:aws:sso:::permissionSet/ssoins-abcdef0123456789/ps-readonly123,210987654321,arn:aws:sso:::instance/ssoins-abcdef0123456789"

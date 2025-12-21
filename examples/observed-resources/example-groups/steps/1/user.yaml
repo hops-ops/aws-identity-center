@@ -1,0 +1,17 @@
+# Step 1: User becomes Ready
+apiVersion: identitystore.aws.m.upbound.io/v1beta1
+kind: User
+metadata:
+  name: workloads-ic-user-workloads-reader
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: identity-center-user-workloads-reader
+    crossplane.io/composition-resource-name: identity-center-user-workloads-reader
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    userId: "84815e08-0091-7032-44b5-workloads02"
+    id: "84815e08-0091-7032-44b5-workloads02"

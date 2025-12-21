@@ -1,0 +1,17 @@
+# Step 2: GroupMembership Ready
+apiVersion: identitystore.aws.m.upbound.io/v1beta1
+kind: GroupMembership
+metadata:
+  name: workloads-ic-membership-workloads-reader-workloadsengineering
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: identity-center-group-membership-workloads-reader-WorkloadsEngineering
+    crossplane.io/composition-resource-name: identity-center-group-membership-workloads-reader-WorkloadsEngineering
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    membershipId: "membership-workloads-reader-workloadseng-12345"
+    id: "membership-workloads-reader-workloadseng-12345"

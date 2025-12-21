@@ -1,0 +1,17 @@
+# Step 2: GroupMembership Ready
+apiVersion: identitystore.aws.m.upbound.io/v1beta1
+kind: GroupMembership
+metadata:
+  name: platform-sso-ic-membership-platform-admin-admins
+  annotations:
+    gotemplating.fn.crossplane.io/composition-resource-name: identity-center-group-membership-platform-admin-Admins
+    crossplane.io/composition-resource-name: identity-center-group-membership-platform-admin-Admins
+status:
+  conditions:
+    - type: Ready
+      status: "True"
+    - type: Synced
+      status: "True"
+  atProvider:
+    membershipId: "membership-platform-admin-admins-12345"
+    id: "membership-platform-admin-admins-12345"
