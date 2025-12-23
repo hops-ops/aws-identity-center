@@ -4,19 +4,19 @@ PACKAGE ?= configuration-aws-identity-center
 XRD_DIR := apis/identitycenters
 COMPOSITION := $(XRD_DIR)/composition.yaml
 DEFINITION := $(XRD_DIR)/definition.yaml
-EXAMPLE_DEFAULT := examples/identitycenters/example-minimal.yaml
+EXAMPLE_DEFAULT := examples/identitycenters/minimal.yaml
 RENDER_TESTS := $(wildcard tests/test-*)
 E2E_TESTS := $(wildcard tests/e2etest-*)
 
 # Examples list - mirrors GitHub Actions workflow
 # Format: example_path::observed_resources_path (observed_resources_path is optional)
 EXAMPLES := \
-    examples/identitycenters/example-minimal.yaml:: \
-    examples/identitycenters/example-minimal.yaml::examples/observed-resources/example-minimal/steps/1/ \
-    examples/identitycenters/example-minimal.yaml::examples/observed-resources/example-minimal/steps/2/ \
-    examples/identitycenters/example-groups.yaml:: \
-    examples/identitycenters/example-groups.yaml::examples/observed-resources/example-groups/steps/1/ \
-    examples/identitycenters/example-groups.yaml::examples/observed-resources/example-groups/steps/2/ \
+    examples/identitycenters/minimal.yaml:: \
+    examples/identitycenters/minimal.yaml::examples/test/mocks/observed-resources/minimal/steps/1/ \
+    examples/identitycenters/minimal.yaml::examples/test/mocks/observed-resources/minimal/steps/2/ \
+    examples/identitycenters/groups.yaml:: \
+    examples/identitycenters/groups.yaml::examples/test/mocks/observed-resources/groups/steps/1/ \
+    examples/identitycenters/groups.yaml::examples/test/mocks/observed-resources/groups/steps/2/ \
     examples/identitycenters/test-no-users.yaml::
 
 clean:

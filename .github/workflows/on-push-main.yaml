@@ -26,12 +26,12 @@ jobs:
     with:
       examples: |
         [
-          { "example": "examples/identitycenters/example-minimal.yaml" },
-          { "example": "examples/identitycenters/example-minimal.yaml", "observed": "examples/observed-resources/example-minimal/steps/1/" },
-          { "example": "examples/identitycenters/example-minimal.yaml", "observed": "examples/observed-resources/example-minimal/steps/2/" },
-          { "example": "examples/identitycenters/example-groups.yaml" },
-          { "example": "examples/identitycenters/example-groups.yaml", "observed": "examples/observed-resources/example-groups/steps/1/" },
-          { "example": "examples/identitycenters/example-groups.yaml", "observed": "examples/observed-resources/example-groups/steps/2/" },
+          { "example": "examples/identitycenters/minimal.yaml" },
+          { "example": "examples/identitycenters/minimal.yaml", "observed": "examples/test/mocks/observed-resources/minimal/steps/1/" },
+          { "example": "examples/identitycenters/minimal.yaml", "observed": "examples/test/mocks/observed-resources/minimal/steps/2/" },
+          { "example": "examples/identitycenters/groups.yaml" },
+          { "example": "examples/identitycenters/groups.yaml", "observed": "examples/test/mocks/observed-resources/groups/steps/1/" },
+          { "example": "examples/identitycenters/groups.yaml", "observed": "examples/test/mocks/observed-resources/groups/steps/2/" },
           { "example": "examples/identitycenters/test-no-users.yaml" }
         ]
       api_path: apis/identitycenters

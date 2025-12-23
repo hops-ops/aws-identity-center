@@ -11,7 +11,7 @@ _items = [
         metadata.name: "test-identity-center-minimal"
         spec = {
             compositionPath: "apis/identitycenters/composition.yaml"
-            xrPath: "examples/identitycenters/example-minimal.yaml"
+            xrPath: "examples/identitycenters/minimal.yaml"
             xrdPath: "apis/identitycenters/definition.yaml"
             timeoutSeconds: 120
             validate: True
@@ -138,7 +138,7 @@ _items = [
         metadata.name: "test-identity-center-inline-policy"
         spec = {
             compositionPath: "apis/identitycenters/composition.yaml"
-            xrPath: "examples/identitycenters/example-groups.yaml"
+            xrPath: "examples/identitycenters/groups.yaml"
             xrdPath: "apis/identitycenters/definition.yaml"
             timeoutSeconds: 120
             validate: True
