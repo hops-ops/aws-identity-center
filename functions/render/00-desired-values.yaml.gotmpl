@@ -6,7 +6,6 @@
 
 {{ $organizationName := $spec.organizationName | default ($metadata.name | default "identity-center") }}
 {{ $managementMode := $spec.managementMode | default "self" }}
-{{ $deletionPolicy := $spec.deletionPolicy | default "Delete" }}
 {{ $managementPolicies := $spec.managementPolicies | default (list "*") }}
 
 {{ $providerConfigName := $spec.providerConfigName | default $organizationName | default "default" }}
