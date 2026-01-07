@@ -1,4 +1,4 @@
-# configuration-aws-identity-center
+# aws-identity-center
 
 Manage AWS IAM Identity Center (SSO) as code. Define groups, users, permission sets, and account assignments in a single resource.
 

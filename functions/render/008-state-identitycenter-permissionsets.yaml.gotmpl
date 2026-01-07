@@ -139,9 +139,11 @@
       "managedPolicies" $managedPolicies
       "customerManagedPolicies" $customerManagedPolicies
       "assignments" $assignments
-      "labels" (dict
-        "hops.ops.com.ai/organization" $ic.name
-        "aws.hops.ops.com.ai/identity-center-permission-set" $slug
+      "labels" (merge
+        $ic.labels
+        (dict
+          "aws.hops.ops.com.ai/identity-center-permission-set" $slug
+        )
       )
       "tags" (merge $ic.tags ($permissionSet.tags | default dict))
       "forProvider" ($permissionSet.forProvider | default dict)

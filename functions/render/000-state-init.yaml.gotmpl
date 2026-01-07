@@ -19,6 +19,12 @@
 {{- $identityCenter := $spec.identityCenter | default dict }}
 {{- $defaultTags := dict "hops" "true" "organization" $organizationName }}
 
+{{- /* Default labels: managed=true + <kind>=<name> */}}
+{{- $defaultLabels := dict
+  "hops.ops.com.ai/managed" "true"
+  (printf "hops.ops.com.ai/%s" (lower $xr.kind)) $metadata.name
+}}
+
 # Initialize $state
 {{- $state := dict
   "spec" (dict
@@ -31,6 +37,7 @@
         "name" $providerConfigName
         "kind" $providerConfigKind
       )
+      "labels" (merge $defaultLabels ($spec.labels | default dict))
       "identityStoreId" ($spec.identityStoreId | default "")
       "identityCenter" (dict
         "instanceArn" ($identityCenter.instanceArn | default "")

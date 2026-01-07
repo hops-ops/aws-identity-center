@@ -1,5 +1,5 @@
 apiVersion: v2
-name: configuration-aws-identity-center
+name: aws-identity-center
 version: 0.0.0
-description: GitOps packaging for configuration-aws-identity-center
+description: GitOps packaging for aws-identity-center
 appVersion: v1.19.0

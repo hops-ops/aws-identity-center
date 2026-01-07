@@ -1,7 +1,7 @@
 apiVersion: meta.dev.upbound.io/v2alpha1
 kind: Project
 metadata:
-  name: configuration-aws-identity-center
+  name: aws-identity-center
 spec:
   dependsOn:
   - apiVersion: pkg.crossplane.io/v1
@@ -21,8 +21,8 @@ spec:
   license: Apache-2.0
   maintainer: Patrick Lee Scott <pat@patscott.io>
   readme: |
-    # configuration-aws-identity-center
+    # aws-identity-center
 
     Provides a reusable Identity Center blueprint covering Identity Store principals plus permission sets and account assignments.
-  repository: ghcr.io/hops-ops/configuration-aws-identity-center
-  source: github.com/hops-ops/configuration-aws-identity-center
+  repository: ghcr.io/hops-ops/aws-identity-center
+  source: github.com/hops-ops/aws-identity-center

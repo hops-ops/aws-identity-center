@@ -52,8 +52,8 @@
       "groups" ($user.groups | default list)
       "groupMembershipExternalNames" ($user.groupMembershipExternalNames | default dict)
       "labels" (merge
-        (dict "hops.ops.com.ai/organization" $ic.name "aws.hops.ops.com.ai/identity-center-user" $userSlug)
-        ($user.tags | default dict)
+        $ic.labels
+        (dict "aws.hops.ops.com.ai/identity-center-user" $userSlug)
       )
       "forProvider" ($user.forProvider | default dict)
     }}

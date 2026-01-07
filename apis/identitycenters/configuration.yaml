@@ -1,10 +1,10 @@
 apiVersion: meta.pkg.crossplane.io/v1alpha1
 kind: Configuration
 metadata:
-  name: configuration-aws-identity-center
+  name: aws-identity-center
   annotations:
     meta.crossplane.io/maintainer: Patrick Lee Scott
-    meta.crossplane.io/source: github.com/hops-ops/configuration-aws-identity-center
+    meta.crossplane.io/source: github.com/hops-ops/aws-identity-center
     meta.crossplane.io/description: Declarative AWS Identity Center (SSO) principals, permission sets, and assignments for hops.
 spec:
   dependsOn:

@@ -58,6 +58,12 @@ spec:
                     type: string
                     description: Kind of the provider config reference. Defaults to ProviderConfig.
                     default: ProviderConfig
+              labels:
+                type: object
+                description: Custom labels applied to all managed resources. Merged with default labels (hops.ops.com.ai/managed, hops.ops.com.ai/<kind>).
+                additionalProperties:
+                  type: string
+                x-kubernetes-preserve-unknown-fields: true
               identityStoreId:
                 type: string
                 description: Identity Store ID (for example, d-1234567890).

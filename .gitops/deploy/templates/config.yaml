@@ -1,9 +1,9 @@
 apiVersion: pkg.crossplane.io/v1
 kind: Configuration
 metadata:
-  name: configuration-aws-identity-center
+  name: aws-identity-center
 spec:
-  package: ghcr.io/hops-ops/configuration-aws-identity-center:{{ .Values.version }}
+  package: ghcr.io/hops-ops/aws-identity-center:{{ .Values.version }}
   packagePullSecrets:
     - name: ghcr
   skipDependencyResolution: {{ .Values.skipDependencyResolution }}
@@ -13,9 +13,9 @@ spec:
 apiVersion: pkg.crossplane.io/v1
 kind: Function
 metadata:
-  name: hops-ops-configuration-aws-identity-centerrender
+  name: hops-ops-aws-identity-centerrender
 spec:
-  package: ghcr.io/hops-ops/configuration-aws-identity-center_render:{{ .Values.version }}
+  package: ghcr.io/hops-ops/aws-identity-center_render:{{ .Values.version }}
   packagePullSecrets:
     - name: ghcr
   skipDependencyResolution: {{ .Values.skipDependencyResolution }}
