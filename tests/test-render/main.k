@@ -174,6 +174,7 @@ _items = [
 
     # =============================================================================
     # Test: External name annotation for importing existing resources
+    # Uses inline externalName fields on each item
     # =============================================================================
     metav1alpha1.CompositionTest{
         metadata.name: "external-name-import"
@@ -342,8 +343,8 @@ _items = [
                     kind: "PermissionSet"
                     metadata.name: "tags-test-taggedps"
                     spec.forProvider.tags: {
-                        hops: "true"
-                        organization: "tags-test"
+                        "hops.ops.com.ai/managed": "true"
+                        "hops.ops.com.ai/identitycenter": "tags-test"
                         environment: "production"
                     }
                 }

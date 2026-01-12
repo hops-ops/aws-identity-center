@@ -8,6 +8,7 @@
 {{- $xr := getCompositeResource . }}
 {{- $metadata := $xr.metadata | default dict }}
 {{- $spec := $xr.spec | default dict }}
+{{- $name := $metadata.name | default "" }}
 
 # Compute effective values with defaults
 {{- $organizationName := $spec.organizationName | default $metadata.name | default "identity-center" }}
@@ -17,13 +18,14 @@
 {{- $providerConfigKind := $providerConfigRef.kind | default "ProviderConfig" }}
 
 {{- $identityCenter := $spec.identityCenter | default dict }}
-{{- $defaultTags := dict "hops" "true" "organization" $organizationName }}
 
-{{- /* Default labels: managed=true + <kind>=<name> */}}
-{{- $defaultLabels := dict
+{{- /* Default labels/tags: managed=true + <kind>=<name> */}}
+{{- $defaults := dict
   "hops.ops.com.ai/managed" "true"
-  (printf "hops.ops.com.ai/%s" (lower $xr.kind)) $metadata.name
+  (printf "hops.ops.com.ai/%s" (lower $xr.kind)) $name
 }}
+{{- $labels := merge $defaults ($spec.labels | default dict) }}
+{{- $tags := merge $defaults ($spec.tags | default dict) }}
 
 # Initialize $state
 {{- $state := dict
@@ -37,13 +39,14 @@
         "name" $providerConfigName
         "kind" $providerConfigKind
       )
-      "labels" (merge $defaultLabels ($spec.labels | default dict))
+      "labels" $labels
+      "tags" $tags
       "identityStoreId" ($spec.identityStoreId | default "")
       "identityCenter" (dict
         "instanceArn" ($identityCenter.instanceArn | default "")
         "relayState" ($identityCenter.relayState | default "")
         "sessionDuration" ($identityCenter.sessionDuration | default "PT1H")
-        "tags" (merge $defaultTags ($identityCenter.tags | default dict))
+        "tags" (merge $tags ($identityCenter.tags | default dict))
       )
       "groups" ($spec.groups | default list)
       "users" ($spec.users | default list)
