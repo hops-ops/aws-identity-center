@@ -2,10 +2,10 @@
 apiVersion: protection.crossplane.io/v1beta1
 kind: Usage
 metadata:
-  name: of-platform-sso-adminaccess-by-platform-sso-adminaccess-assign-123456789012-group-admins
+  name: delete-platform-sso-adminaccess-assign-123456789012-group-admins-before-platform-sso-adminaccess
   annotations:
-    gotemplating.fn.crossplane.io/composition-resource-name: permission-set-assignment-AdminAccess-123456789012-group-admins-usage
-    crossplane.io/composition-resource-name: permission-set-assignment-AdminAccess-123456789012-group-admins-usage
+    gotemplating.fn.crossplane.io/composition-resource-name: delete-permission-set-assignment-AdminAccess-123456789012-group-admins-before-AdminAccess
+    crossplane.io/composition-resource-name: delete-permission-set-assignment-AdminAccess-123456789012-group-admins-before-AdminAccess
 status:
   conditions:
     - type: Ready

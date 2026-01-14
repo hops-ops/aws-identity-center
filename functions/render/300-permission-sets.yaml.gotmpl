@@ -38,10 +38,11 @@ spec:
     {{- if $ps.relayState }}
     relayState: {{ $ps.relayState }}
     {{- end }}
-    {{- if $ps.tags }}
     tags:
+      Name: {{ $ps.resourceName }}
+      {{- if $ps.tags }}
       {{- toYaml $ps.tags | nindent 6 }}
-    {{- end }}
+      {{- end }}
     {{- with $ps.forProvider }}
     {{ toYaml . | nindent 4 }}
     {{- end }}
@@ -77,7 +78,7 @@ spec:
     name: {{ $ic.providerConfig.name }}
     kind: {{ $ic.providerConfig.kind }}
 
-      {{- /* Usage: PermissionSet protected by InlinePolicy */}}
+      {{- /* Usage: Delete InlinePolicy before PermissionSet */}}
       {{- $inlineReady := get $obs.readiness.inlinePolicies $ps.name | default false }}
       {{- if and $psReady $inlineReady }}
 
@@ -86,9 +87,9 @@ spec:
 apiVersion: protection.crossplane.io/v1beta1
 kind: Usage
 metadata:
-  name: {{ printf "of-%s-by-%s-inline" $ps.resourceName $ps.resourceName }}
+  name: {{ printf "delete-%s-inline-before-%s" $ps.resourceName $ps.resourceName }}
   annotations:
-    {{ setResourceNameAnnotation (printf "permission-set-inline-policy-usage-%s" $ps.name) }}
+    {{ setResourceNameAnnotation (printf "delete-inline-policy-before-%s" $ps.name) }}
 spec:
   replayDeletion: true
   of:
@@ -132,7 +133,7 @@ spec:
     name: {{ $ic.providerConfig.name }}
     kind: {{ $ic.providerConfig.kind }}
 
-      {{- /* Usage: PermissionSet protected by ManagedPolicyAttachment */}}
+      {{- /* Usage: Delete ManagedPolicyAttachment before PermissionSet */}}
       {{- $managedReady := get $obs.readiness.managedPolicies $policy.annotationKey | default false }}
       {{- if and $psReady $managedReady }}
 
@@ -141,9 +142,9 @@ spec:
 apiVersion: protection.crossplane.io/v1beta1
 kind: Usage
 metadata:
-  name: {{ printf "of-%s-by-%s" $ps.resourceName $policy.resourceName }}
+  name: {{ printf "delete-%s-before-%s" $policy.resourceName $ps.resourceName }}
   annotations:
-    {{ setResourceNameAnnotation (printf "%s-usage" $policy.annotationKey) }}
+    {{ setResourceNameAnnotation (printf "delete-%s-before-%s" $policy.annotationKey $ps.name) }}
 spec:
   replayDeletion: true
   of:
@@ -191,7 +192,7 @@ spec:
     name: {{ $ic.providerConfig.name }}
     kind: {{ $ic.providerConfig.kind }}
 
-      {{- /* Usage: PermissionSet protected by CustomerManagedPolicyAttachment */}}
+      {{- /* Usage: Delete CustomerManagedPolicyAttachment before PermissionSet */}}
       {{- $customerReady := get $obs.readiness.customerManagedPolicies $policy.annotationKey | default false }}
       {{- if and $psReady $customerReady }}
 
@@ -200,9 +201,9 @@ spec:
 apiVersion: protection.crossplane.io/v1beta1
 kind: Usage
 metadata:
-  name: {{ printf "of-%s-by-%s" $ps.resourceName $policy.resourceName }}
+  name: {{ printf "delete-%s-before-%s" $policy.resourceName $ps.resourceName }}
   annotations:
-    {{ setResourceNameAnnotation (printf "%s-usage" $policy.annotationKey) }}
+    {{ setResourceNameAnnotation (printf "delete-%s-before-%s" $policy.annotationKey $ps.name) }}
 spec:
   replayDeletion: true
   of:

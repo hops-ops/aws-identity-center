@@ -2,10 +2,10 @@
 apiVersion: protection.crossplane.io/v1beta1
 kind: Usage
 metadata:
-  name: of-platform-sso-adminaccess-by-platform-sso-adminaccess-managed-administratoraccess
+  name: delete-platform-sso-adminaccess-managed-administratoraccess-before-platform-sso-adminaccess
   annotations:
-    gotemplating.fn.crossplane.io/composition-resource-name: permission-set-managed-policy-AdminAccess-administratoraccess-usage
-    crossplane.io/composition-resource-name: permission-set-managed-policy-AdminAccess-administratoraccess-usage
+    gotemplating.fn.crossplane.io/composition-resource-name: delete-permission-set-managed-policy-AdminAccess-administratoraccess-before-AdminAccess
+    crossplane.io/composition-resource-name: delete-permission-set-managed-policy-AdminAccess-administratoraccess-before-AdminAccess
 status:
   conditions:
     - type: Ready

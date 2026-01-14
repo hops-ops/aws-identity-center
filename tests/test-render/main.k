@@ -602,7 +602,7 @@ _items = [
                 {
                     apiVersion: "protection.crossplane.io/v1beta1"
                     kind: "Usage"
-                    metadata.name: "of-observed-test-observedps-by-observed-test-observedps-managed-readonlyaccess"
+                    metadata.name: "delete-observed-test-observedps-managed-readonlyaccess-before-observed-test-observedps"
                     spec: {
                         replayDeletion: True
                         of: {

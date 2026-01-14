@@ -67,7 +67,7 @@ spec:
     name: {{ $ic.providerConfig.name }}
     kind: {{ $ic.providerConfig.kind }}
 
-        {{- /* Usage: PermissionSet protected by AccountAssignment */}}
+        {{- /* Usage: Delete AccountAssignment before PermissionSet */}}
         {{- $assignmentReady := get $obs.readiness.accountAssignments $assignmentAnnotationKey | default false }}
         {{- if and $psReady $assignmentReady }}
 
@@ -76,9 +76,9 @@ spec:
 apiVersion: protection.crossplane.io/v1beta1
 kind: Usage
 metadata:
-  name: {{ printf "of-%s-by-%s" $ps.resourceName $assignmentResourceName }}
+  name: {{ printf "delete-%s-before-%s" $assignmentResourceName $ps.resourceName }}
   annotations:
-    {{ setResourceNameAnnotation (printf "%s-usage" $assignmentAnnotationKey) }}
+    {{ setResourceNameAnnotation (printf "delete-%s-before-%s" $assignmentAnnotationKey $ps.name) }}
 spec:
   replayDeletion: true
   of:
