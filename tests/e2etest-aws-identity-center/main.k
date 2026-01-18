@@ -27,16 +27,16 @@ _target_account = "544051101726"
 
 # Admins group - fill ID after first run for persistence
 _persistent_group_name = "Admins"
-_persistent_group_id = ""  # aws identitystore list-groups --identity-store-id d-9a675288a4
+_persistent_group_id = "710b35f0-2061-7026-da5c-b5cd9f22002d"  # aws identitystore list-groups --identity-store-id d-9a675288a4
 
 # Pat - admin user
 _persistent_user_name = "pat"
-_persistent_user_id = ""  # aws identitystore list-users --identity-store-id d-9a675288a4 --filters AttributePath=UserName,AttributeValue=pat
-_persistent_membership_id = ""  # aws identitystore list-group-memberships --identity-store-id d-9a675288a4 --group-id <group_id>
+_persistent_user_id = "f19b25a0-10c1-70fa-808b-d3da146d8aa5"  # aws identitystore list-users --identity-store-id d-9a675288a4 --filters AttributePath=UserName,AttributeValue=pat
+_persistent_membership_id = "818b75f0-60a1-700c-b5e4-dcfdd36616c8"  # aws identitystore list-group-memberships --identity-store-id d-9a675288a4 --group-id <group_id>
 
 # AdminAccess permission set
 _persistent_permission_set_name = "AdminAccess"
-_persistent_permission_set_arn = ""  # aws sso-admin list-permission-sets --instance-arn arn:aws:sso:::instance/ssoins-668444b406cda8b2
+_persistent_permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-668444b406cda8b2/ps-4751b925ba450440"  # aws sso-admin list-permission-sets --instance-arn arn:aws:sso:::instance/ssoins-668444b406cda8b2
 _persistent_permission_set_external_name = _persistent_permission_set_arn + "," + _instance_arn if _persistent_permission_set_arn else ""
 
 # =============================================================================
