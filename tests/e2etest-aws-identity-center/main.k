@@ -25,19 +25,19 @@ _region = "us-east-2"
 # Target account for testing permission set assignments
 _target_account = "544051101726"
 
-# Persistent group - imported via externalName, not deleted on cleanup
-_persistent_group_name = "hops-e2e-test"
-_persistent_group_id = "d1fb9590-0091-7072-55a4-dd0778f5d5cb"
+# Admins group - fill ID after first run for persistence
+_persistent_group_name = "Admins"
+_persistent_group_id = "710b35f0-2061-7026-da5c-b5cd9f22002d"  # aws identitystore list-groups --identity-store-id d-9a675288a4
 
-# Persistent user - imported via externalName, not deleted on cleanup
-_persistent_user_name = "hops-e2e-admin"
-_persistent_user_id = "217be550-1051-7016-a428-1864e5e57e75"
-_persistent_membership_id = "115b85b0-f0c1-70ae-802f-41695fa2f655"  # Fill with MembershipId for hops-e2e-admin in hops-e2e-test (list-group-memberships)
+# Pat - admin user
+_persistent_user_name = "pat"
+_persistent_user_id = "f19b25a0-10c1-70fa-808b-d3da146d8aa5"  # aws identitystore list-users --identity-store-id d-9a675288a4 --filters AttributePath=UserName,AttributeValue=pat
+_persistent_membership_id = "818b75f0-60a1-700c-b5e4-dcfdd36616c8"  # aws identitystore list-group-memberships --identity-store-id d-9a675288a4 --group-id <group_id>
 
-# Persistent permission set - imported via externalName, not deleted on cleanup
-_persistent_permission_set_name = "E2EPersistentAccess"
-_persistent_permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-668444b406cda8b2/ps-aaebc62f1ea517cc"
-_persistent_permission_set_external_name = _persistent_permission_set_arn + "," + _instance_arn
+# AdminAccess permission set
+_persistent_permission_set_name = "AdminAccess"
+_persistent_permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-668444b406cda8b2/ps-4751b925ba450440"  # aws sso-admin list-permission-sets --instance-arn arn:aws:sso:::instance/ssoins-668444b406cda8b2
+_persistent_permission_set_external_name = _persistent_permission_set_arn + "," + _instance_arn if _persistent_permission_set_arn else ""
 
 # =============================================================================
 # Dynamic test resources - timestamped to allow concurrent test runs
@@ -72,11 +72,12 @@ _items = [
                             sessionDuration: "PT2H"
                         }
                         groups: [
-                            # Persistent group - imported and orphaned (won't be deleted)
+                            # Admins group - orphaned on cleanup
                             {
                                 name: _persistent_group_name
-                                displayName: "E2E Persistent Admins"
-                                externalName: _persistent_group_id
+                                displayName: "Admins"
+                                if _persistent_group_id:
+                                    externalName: _persistent_group_id
                                 managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
                             }
                             # Timestamped group - created and deleted each run
@@ -86,18 +87,18 @@ _items = [
                             }
                         ]
                         users: [
-                            # Persistent user - imported and orphaned (won't be deleted)
+                            # Pat - admin user, orphaned on cleanup
                             {
                                 username: _persistent_user_name
-                                email: "hops-e2e-admin@ops.com.ai"
-                                firstName: "E2E"
-                                lastName: "Persistent"
-                                externalName: _persistent_user_id
+                                email: "pat@ops.com.ai"
+                                firstName: "Patrick Lee"
+                                lastName: "Scott"
+                                if _persistent_user_id:
+                                    externalName: _persistent_user_id
                                 managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
                                 groups: [_persistent_group_name]
-                                groupMembershipExternalNames: {
-                                    (_persistent_group_name): _persistent_membership_id
-                                }
+                                if _persistent_membership_id:
+                                    groupMembershipExternalNames: {(_persistent_group_name): _persistent_membership_id}
                             }
                             # Timestamped user - created and deleted each run
                             {
@@ -109,14 +110,15 @@ _items = [
                             }
                         ]
                         permissionSets: [
-                            # Persistent permission set - imported and orphaned
+                            # AdminAccess - full admin, orphaned on cleanup
                             {
                                 name: _persistent_permission_set_name
-                                description: "Persistent permission set for e2e testing"
-                                externalName: _persistent_permission_set_external_name
+                                description: "Full administrator access"
+                                if _persistent_permission_set_external_name:
+                                    externalName: _persistent_permission_set_external_name
                                 managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
                                 managedPolicies: [
-                                    "arn:aws:iam::aws:policy/ReadOnlyAccess"
+                                    "arn:aws:iam::aws:policy/AdministratorAccess"
                                 ]
                                 assignToGroups: [_persistent_group_name]
                                 assignToAccounts: [_target_account]
