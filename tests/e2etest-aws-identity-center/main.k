@@ -22,6 +22,9 @@ _instance_arn = "arn:aws:sso:::instance/ssoins-668444b406cda8b2"
 _identity_store_id = "d-9a675288a4"
 _region = "us-east-2"
 
+# Management/root account - the organization's management account
+_management_account = "034489662075"
+
 # Target account for testing permission set assignments
 _target_account = "544051101726"
 
@@ -121,7 +124,7 @@ _items = [
                                     "arn:aws:iam::aws:policy/AdministratorAccess"
                                 ]
                                 assignToGroups: [_persistent_group_name]
-                                assignToAccounts: [_target_account]
+                                assignToAccounts: [_management_account, _target_account]
                             }
                             # Timestamped permission set - created and deleted each run
                             {
