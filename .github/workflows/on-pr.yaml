@@ -55,6 +55,7 @@ jobs:
       aws-use-oidc: true
       aws-account-id: "034489662075"
       aws-region: us-east-2
+      write-env-files: true
       env-vars: |
         {
           "SSO_INSTANCE_ARN": "${{ vars.SSO_INSTANCE_ARN }}",
