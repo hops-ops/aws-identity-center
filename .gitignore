@@ -1,4 +1,5 @@
 tests/e2etest-identity-center/aws-creds
 tests/e2etest-identity-center/secrets/
+tests/**/env/
 .up/
 _output/

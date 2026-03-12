@@ -18,28 +18,28 @@ _base64_creds = base64.encode(_creds)
 
 # Identity Center instance - AWS only allows one per organization
 # Get these values with: aws sso-admin list-instances
-_instance_arn = "arn:aws:sso:::instance/ssoins-668444b406cda8b2"
-_identity_store_id = "d-9a675288a4"
-_region = "us-east-2"
+_instance_arn = file.read("env/SSO_INSTANCE_ARN").strip()
+_identity_store_id = file.read("env/IDENTITY_STORE_ID").strip()
+_region = file.read("env/AWS_REGION").strip()
 
 # Management/root account - the organization's management account
-_management_account = "034489662075"
+_management_account = file.read("env/AWS_ACCOUNT_ID").strip()
 
 # Target account for testing permission set assignments
-_target_account = "544051101726"
+_target_account = file.read("env/TARGET_ACCOUNT_ID").strip()
 
 # Admins group - fill ID after first run for persistence
-_persistent_group_name = "Admins"
-_persistent_group_id = "710b35f0-2061-7026-da5c-b5cd9f22002d"  # aws identitystore list-groups --identity-store-id d-9a675288a4
+_persistent_group_name = file.read("env/ADMINS_GROUP_NAME").strip()
+_persistent_group_id = file.read("env/ADMINS_GROUP_ID").strip()
 
 # Pat - admin user
-_persistent_user_name = "pat"
-_persistent_user_id = "f19b25a0-10c1-70fa-808b-d3da146d8aa5"  # aws identitystore list-users --identity-store-id d-9a675288a4 --filters AttributePath=UserName,AttributeValue=pat
-_persistent_membership_id = "818b75f0-60a1-700c-b5e4-dcfdd36616c8"  # aws identitystore list-group-memberships --identity-store-id d-9a675288a4 --group-id <group_id>
+_persistent_user_name = file.read("env/PAT_USER_NAME").strip()
+_persistent_user_id = file.read("env/PAT_USER_ID").strip()
+_persistent_membership_id = file.read("env/PAT_MEMBERSHIP_ID").strip()
 
 # AdminAccess permission set
-_persistent_permission_set_name = "AdminAccess"
-_persistent_permission_set_arn = "arn:aws:sso:::permissionSet/ssoins-668444b406cda8b2/ps-4751b925ba450440"  # aws sso-admin list-permission-sets --instance-arn arn:aws:sso:::instance/ssoins-668444b406cda8b2
+_persistent_permission_set_name = file.read("env/ADMIN_ACCESS_PERMISSION_SET_NAME").strip()
+_persistent_permission_set_arn = file.read("env/ADMIN_ACCESS_PERMISSION_SET_ARN").strip()
 _persistent_permission_set_external_name = _persistent_permission_set_arn + "," + _instance_arn if _persistent_permission_set_arn else ""
 
 # =============================================================================
