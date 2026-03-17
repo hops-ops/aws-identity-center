@@ -49,6 +49,20 @@ jobs:
       aws-use-oidc: true
       aws-account-id: "034489662075"
       aws-region: us-east-2
+      write-env-files: true
+      env-vars: |
+        {
+          "SSO_INSTANCE_ARN": "${{ vars.SSO_INSTANCE_ARN }}",
+          "IDENTITY_STORE_ID": "${{ vars.IDENTITY_STORE_ID }}",
+          "TARGET_ACCOUNT_ID": "${{ vars.TARGET_ACCOUNT_ID }}",
+          "ADMINS_GROUP_NAME": "${{ vars.ADMINS_GROUP_NAME }}",
+          "ADMINS_GROUP_ID": "${{ vars.ADMINS_GROUP_ID }}",
+          "PAT_USER_NAME": "${{ vars.PAT_USER_NAME }}",
+          "PAT_USER_ID": "${{ vars.PAT_USER_ID }}",
+          "PAT_MEMBERSHIP_ID": "${{ vars.PAT_MEMBERSHIP_ID }}",
+          "ADMIN_ACCESS_PERMISSION_SET_NAME": "${{ vars.ADMIN_ACCESS_PERMISSION_SET_NAME }}",
+          "ADMIN_ACCESS_PERMISSION_SET_ARN": "${{ vars.ADMIN_ACCESS_PERMISSION_SET_ARN }}"
+        }
 
   version-and-tag:
     name: Version and Tag
