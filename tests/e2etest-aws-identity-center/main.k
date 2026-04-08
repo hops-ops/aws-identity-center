@@ -122,6 +122,7 @@ _items = [
                                 managementPolicies: ["Create", "Observe", "Update", "LateInitialize"]
                                 managedPolicies: [
                                     "arn:aws:iam::aws:policy/AdministratorAccess"
+                                    "arn:aws:iam::aws:policy/job-function/Billing"
                                 ]
                                 assignToGroups: [_persistent_group_name]
                                 assignToAccounts: [_management_account, _target_account]
