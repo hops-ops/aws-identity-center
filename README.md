@@ -308,6 +308,28 @@ status:
       arn: arn:aws:sso:::permissionSet/ssoins-abcdef/ps-12345678
 ```
 
+## Billing Access
+
+To grant Identity Center users access to AWS Billing and Cost Management, add the `Billing` managed policy to a permission set:
+
+```yaml
+permissionSets:
+  - name: AdministratorAccess
+    managedPolicies:
+      - arn:aws:iam::aws:policy/AdministratorAccess
+      - arn:aws:iam::aws:policy/job-function/Billing
+```
+
+**Important:** IAM billing access requires a one-time manual step in the **management account** that cannot be automated via Crossplane or CloudFormation:
+
+1. Sign into the management account as the **root user**
+2. Go to [Billing console](https://console.aws.amazon.com/billing/) → **Account**
+3. Scroll to **IAM User and Role Access to Billing Information**
+4. Click **Edit** and check **Activate IAM Access**
+5. Click **Update**
+
+Without this, all billing API calls and console access will return "Access denied" regardless of IAM policies attached.
+
 ## Recommendations
 
 1. **Use groups, not direct user assignments** - Easier to manage at scale
