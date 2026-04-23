@@ -4,6 +4,7 @@ PACKAGE ?= aws-identity-center
 XRD_DIR := apis/identitycenters
 COMPOSITION := $(XRD_DIR)/composition.yaml
 DEFINITION := $(XRD_DIR)/definition.yaml
+CONFIGURATION := $(XRD_DIR)/configuration.yaml
 EXAMPLE_DEFAULT := examples/identitycenters/minimal.yaml
 RENDER_TESTS := $(wildcard tests/test-*)
 E2E_TESTS := $(wildcard tests/e2etest-*)
@@ -22,9 +23,14 @@ EXAMPLES := \
 clean:
 	rm -rf _output
 	rm -rf .up
+	rm -f $(CONFIGURATION)
 
 build:
 	up project build
+
+generate-configuration:
+	@set -euo pipefail; \
+	hops validate generate-configuration --path . --api-path "$(XRD_DIR)"
 
 # Render all examples (parallel execution, output shown per-job when complete)
 render\:all:
@@ -57,7 +63,7 @@ render\:all:
 	exit $$failed
 
 # Validate all examples (parallel execution, output shown per-job when complete)
-validate\:all:
+validate\:all: generate-configuration
 	@tmpdir=$$(mktemp -d); \
 	pids=""; \
 	for entry in $(EXAMPLES); do \
@@ -91,8 +97,9 @@ validate\:all:
 	exit $$failed
 
 # Shorthand aliases
-render: render\:all
-validate: validate\:all
+.PHONY: render validate generate-configuration
+render: ; @$(MAKE) 'render:all'
+validate: ; @$(MAKE) generate-configuration 'validate:all'
 
 # Single example render (usage: make render:minimal)
 render\:%:
@@ -106,7 +113,7 @@ render\:%:
 	fi
 
 # Single example validate (usage: make validate:minimal)
-validate\:%:
+validate\:%: generate-configuration
 	@example="examples/identitycenters/$*.yaml"; \
 	if [ -f "$$example" ]; then \
 		echo "=== Validating $$example ==="; \
