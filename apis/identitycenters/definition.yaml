@@ -228,6 +228,21 @@ spec:
                         - Update
                         - Delete
                         - LateInitialize
+                    assignmentManagementPolicies:
+                      type: array
+                      description: |
+                        ManagementPolicies for account assignments rendered from this permission set.
+                        Defaults to the permission set managementPolicies when omitted. Set this
+                        separately when adopting a permission set while managing new assignments.
+                      items:
+                        type: string
+                        enum:
+                        - "*"
+                        - Create
+                        - Observe
+                        - Update
+                        - Delete
+                        - LateInitialize
                     inlinePolicy:
                       type: string
                       description: Inline JSON policy document attached to the permission set.

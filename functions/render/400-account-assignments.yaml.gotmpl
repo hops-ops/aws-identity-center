@@ -46,7 +46,7 @@ metadata:
   labels:
     {{- toYaml $ps.labels | nindent 4 }}
 spec:
-  managementPolicies: {{ toYaml $ps.managementPolicies | nindent 4 }}
+  managementPolicies: {{ toYaml $ps.assignmentManagementPolicies | nindent 4 }}
   forProvider:
     instanceArn: {{ $ic.instanceArn }}
     permissionSetArnRef:

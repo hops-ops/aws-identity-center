@@ -23,6 +23,10 @@
     {{- $slug := regexReplaceAll "[^a-z0-9-]" (lower $name) "-" }}
     {{- $resourceName := printf "%s-%s" $ic.name $slug }}
     {{- $mgmtPolicies := $permissionSet.managementPolicies | default $ic.managementPolicies }}
+    {{- $assignmentMgmtPolicies := $mgmtPolicies }}
+    {{- if hasKey $permissionSet "assignmentManagementPolicies" }}
+      {{- $assignmentMgmtPolicies = $permissionSet.assignmentManagementPolicies }}
+    {{- end }}
     {{- $extName := $permissionSet.externalName | default "" }}
 
     {{- $permissionSetResourceNames = set $permissionSetResourceNames $name $resourceName }}
@@ -134,6 +138,7 @@
       "sessionDuration" ($permissionSet.sessionDuration | default $ic.sessionDuration)
       "relayState" ($permissionSet.relayState | default $ic.relayState)
       "managementPolicies" $mgmtPolicies
+      "assignmentManagementPolicies" $assignmentMgmtPolicies
       "externalName" $extName
       "inlinePolicy" ($permissionSet.inlinePolicy | default "")
       "managedPolicies" $managedPolicies
